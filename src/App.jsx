@@ -16,6 +16,20 @@ function MonogramaIR({ className = '' }) {
   );
 }
 
+// Ícones minimalistas para Data e Local
+const CalendarIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+  </svg>
+);
+
+const PinIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+  </svg>
+);
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -39,12 +53,8 @@ function App() {
 
   const handleSubmitRsvp = (e) => {
     e.preventDefault();
-
     console.log('RSVP:', rsvp);
-
-    // Aqui entra a integração com Supabase/API:
-    // await supabase.from('rsvp').insert([rsvp]);
-
+    // Integração com Supabase/API aqui
     setEnviado(true);
   };
 
@@ -101,45 +111,11 @@ function App() {
         </div>
 
         <nav className="flex flex-col space-y-8 text-center font-apoio text-sm tracking-[0.2em] text-vinho/80">
-          <a
-            href="#inicio"
-            onClick={() => setIsSidebarOpen(false)}
-            className="transition hover:text-dourado"
-          >
-            INÍCIO
-          </a>
-
-          <a
-            href="#historia"
-            onClick={() => setIsSidebarOpen(false)}
-            className="transition hover:text-dourado"
-          >
-            NOSSA HISTÓRIA
-          </a>
-
-          <a
-            href="#rsvp"
-            onClick={() => setIsSidebarOpen(false)}
-            className="transition hover:text-dourado"
-          >
-            PRESENÇA
-          </a>
-
-          <a
-            href="#presentes"
-            onClick={() => setIsSidebarOpen(false)}
-            className="transition hover:text-dourado"
-          >
-            LISTA DE PRESENTES
-          </a>
-
-          <a
-            href="#mensagens"
-            onClick={() => setIsSidebarOpen(false)}
-            className="transition hover:text-dourado"
-          >
-            MENSAGENS
-          </a>
+          <a href="#inicio" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">INÍCIO</a>
+          <a href="#historia" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">NOSSA HISTÓRIA</a>
+          <a href="#rsvp" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">PRESENÇA</a>
+          <a href="#presentes" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">LISTA DE PRESENTES</a>
+          <a href="#mensagens" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">MENSAGENS</a>
         </nav>
       </aside>
 
@@ -181,7 +157,6 @@ function App() {
         className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24 lg:py-32"
       >
         <div className="mx-auto w-full max-w-sm bg-[#E9DFD3] px-6 md:max-w-4xl md:px-12 lg:max-w-5xl lg:px-16">
-
           <div className="relative z-20 mb-6 text-center md:mb-12">
             <div className="mb-3 flex justify-center md:mb-5">
               <MonogramaIR className="h-8 w-11 md:h-11 md:w-14" />
@@ -193,31 +168,13 @@ function App() {
           </div>
 
           <div className="flex items-stretch gap-2 md:gap-8 lg:gap-12">
-
             <div className="w-[55%] space-y-1.5 text-left text-[8.5px] leading-snug text-vinho md:w-[58%] md:space-y-5 md:text-sm md:leading-relaxed lg:text-[15px]">
-              <p>
-                A nossa história começou em 2018, quando nos conhecemos através de amigos em comum da faculdade.
-              </p>
-
-              <p>
-                Desde o início, havia interesse e uma conexão entre nós. Mas, naquele momento, não existia ainda o compromisso ou o envolvimento necessário para construirmos uma vida juntos. Seguimos nossos caminhos, mantendo entre nós uma história que, de alguma forma, nunca deixou de existir.
-              </p>
-
-              <p>
-                Em 2022, a vida nos aproximou novamente. Diante de um período delicado e de muitas mudanças, percebemos que já não queríamos viver a nossa relação da mesma maneira. Escolhemos nos aproximar de verdade, com intenção, compromisso e disposição para construir uma vida juntos.
-              </p>
-
-              <p>
-                Foi preciso mudar muitas coisas. Passamos a dividir mais do que os momentos bons: dividimos decisões, responsabilidades, planos, medos e sonhos. Aos poucos, fomos entendendo que estar juntos significava escolher um ao outro também nos dias difíceis.
-              </p>
-
-              <p>
-                A perda que vivemos naquele período transformou profundamente a nossa maneira de enxergar a vida e o nosso relacionamento. Diante dela, encontramos um no outro companhia, cuidado e força para seguir. E foi nesse caminho, construído com presença e entrega, que o nosso amor se tornou cada vez mais sólido.
-              </p>
-
-              <p>
-                Hoje, olhando para trás, reconhecemos que a bondade e o amor do Senhor estiveram presentes em cada etapa da nossa história. Nos encontros, nos reencontros, nas mudanças e também nos momentos que não escolhemos viver, Deus nos sustentou e conduziu os nossos passos.
-              </p>
+              <p>A nossa história começou em 2018, quando nos conhecemos através de amigos em comum da faculdade.</p>
+              <p>Desde o início, havia interesse e uma conexão entre nós. Mas, naquele momento, não existia ainda o compromisso ou o envolvimento necessário para construirmos uma vida juntos. Seguimos nossos caminhos, mantendo entre nós uma história que, de alguma forma, nunca deixou de existir.</p>
+              <p>Em 2022, a vida nos aproximou novamente. Diante de um período delicado e de muitas mudanças, percebemos que já não queríamos viver a nossa relação da mesma maneira. Escolhemos nos aproximar de verdade, com intenção, compromisso e disposição para construir uma vida juntos.</p>
+              <p>Foi preciso mudar muitas coisas. Passamos a dividir mais do que os momentos bons: dividimos decisões, responsabilidades, planos, medos e sonhos. Aos poucos, fomos entendendo que estar juntos significava escolher um ao outro também nos dias difíceis.</p>
+              <p>A perda que vivemos naquele período transformou profundamente a nossa maneira de enxergar a vida e o nosso relacionamento. Diante dela, encontramos um no outro companhia, cuidado e força para seguir. E foi nesse caminho, construído com presença e entrega, que o nosso amor se tornou cada vez mais sólido.</p>
+              <p>Hoje, olhando para trás, reconhecemos que a bondade e o amor do Senhor estiveram presentes em cada etapa da nossa história. Nos encontros, nos reencontros, nas mudanças e também nos momentos que não escolhemos viver, Deus nos sustentou e conduziu os nossos passos.</p>
             </div>
 
             <div className="relative w-[45%] bg-[#E9DFD3] md:w-[42%]">
@@ -231,244 +188,218 @@ function App() {
         </div>
       </section>
 
-      {/* RSVP */}
+      {/* RSVP (FORMULÁRIO FULL-WIDTH E FLOR PEQUENA NO CANTO) */}
+      {/* RSVP (AJUSTADO PARA MOBILE) */}
       <section
         id="rsvp"
-        className="relative overflow-hidden bg-[#E9DFD3] py-12 md:min-h-screen md:py-24 lg:py-28"
+        className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
       >
-        <div className="relative z-10 mx-auto w-full max-w-sm px-5 md:max-w-5xl md:px-12">
-          <div className="flex items-stretch gap-2 md:gap-10">
+{/* FLOR FIXADA NO CANTO INFERIOR DIREITO */}
+<div className="pointer-events-none bg-[#E9DFD3] absolute bottom-[4%] right-0 z-0 w-[34%] md:w-[24%]">
+  <img
+    src={ilustracaoRSVP}
+    alt="Flor Calla Lily"
+    className="w-full translate-x-[22%] object-contain object-bottom opacity-95 mix-blend-darken"
+  />
+</div>
 
-            {/* CONTEÚDO: 62% no celular, 58% no desktop */}
-            <div className="w-[62%] min-w-0 md:w-[58%]">
-
-              {/* CABEÇALHO RSVP */}
-              <div className="text-center">
-                <div className="flex justify-center">
-                  <MonogramaIR className="h-6 w-9 md:h-12 md:w-16" />
-                </div>
-
-                <div className="mx-auto my-2 h-px w-8 bg-dourado/50 md:my-4 md:w-16" />
-
-                <p className="font-apoio text-[6px] tracking-[0.25em] text-vinho/70 md:text-[10px] md:tracking-[0.4em]">
-                  RSVP
-                </p>
-
-                <h2 className="mt-2 text-[17px] font-light leading-tight tracking-[0.08em] text-dourado md:mt-4 md:text-5xl md:tracking-widest lg:text-6xl">
-                  CONFIRME SUA
-                  <br />
-                  PRESENÇA
-                </h2>
-
-                <p className="mt-2 text-[9px] italic leading-snug text-dourado md:mt-4 md:text-xl">
-                  Sua presença tornará esse dia ainda mais especial.
-                </p>
-
-                <p className="mt-1 font-apoio text-[6px] tracking-[0.18em] text-vinho/70 md:mt-2 md:text-[10px] md:tracking-[0.3em]">
-                  ATÉ 10 DE NOVEMBRO DE 2026
-                </p>
-
-                <div className="mx-auto mt-3 h-px w-8 bg-dourado/50 md:mt-6 md:w-16" />
-              </div>
-
-              {/* SAUDAÇÃO */}
-              <div className="mt-5 md:mt-12">
-                <h3 className="text-[18px] italic text-dourado md:text-4xl">
-                  Isabella e Rafael,
-                </h3>
-
-                <p className="mt-1 text-[8px] leading-snug text-vinho/80 md:text-base">
-                  queremos muito celebrar este dia ao seu lado.
-                </p>
-              </div>
-
-              {/* DATA E LOCAL */}
-              <div className="mt-4 flex flex-col items-center gap-1 font-apoio text-[6px] tracking-[0.16em] text-vinho/80 md:mt-8 md:gap-2 md:text-xs md:tracking-[0.3em]">
-                <p>📅 17 DE JANEIRO DE 2027 · 16H</p>
-                <p>📍 SERRA DOS CRISTAIS</p>
-              </div>
-
-              {/* FORMULÁRIO */}
-              <form
-                onSubmit={handleSubmitRsvp}
-                className="mt-6 space-y-4 md:mt-14 md:space-y-10"
-              >
-
-                {/* PRESENÇA */}
-                <div>
-                  <p className="mb-1.5 font-apoio text-[8px] tracking-wide text-vinho md:mb-3 md:text-base">
-                    Você estará conosco?
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-1.5 md:gap-4">
-                    {[
-                      { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
-                      { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
-                    ].map((op) => {
-                      const ativo = rsvp.presenca === op.valor;
-
-                      return (
-                        <button
-                          type="button"
-                          key={op.valor}
-                          onClick={() => {
-                            setRsvp({ ...rsvp, presenca: op.valor });
-                          }}
-                          className={`flex min-h-[34px] items-center gap-1 rounded-sm border px-1.5 py-2 text-left font-apoio text-[5.5px] leading-tight tracking-[0.07em] text-vinho transition md:min-h-[64px] md:gap-2 md:px-5 md:py-3 md:text-[10px] md:tracking-[0.14em] ${
-                            ativo
-                              ? 'border-dourado bg-dourado/15'
-                              : 'border-dourado/40 hover:border-dourado'
-                          }`}
-                        >
-                          <span className="flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded-full border border-dourado md:h-4 md:w-4">
-                            {ativo && (
-                              <span className="h-1 w-1 rounded-full bg-dourado md:h-2 md:w-2" />
-                            )}
-                          </span>
-
-                          {op.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* ACOMPANHANTES */}
-                {rsvp.presenca === 'sim' && (
-                  <div>
-                    <p className="mb-1 font-apoio text-[8px] tracking-wide text-vinho md:mb-0 md:text-base">
-                      Quem estará conosco?
-                    </p>
-
-                    <p className="mb-1.5 text-[6px] text-vinho/70 md:mb-3 md:mt-1 md:text-xs">
-                      Selecione os nomes dos acompanhantes (se houver).
-                    </p>
-
-                    <div className="flex flex-wrap gap-1.5 md:gap-3">
-                      {['Isabella', 'Rafael'].map((nome) => {
-                        const ativo = rsvp.acompanhantes.includes(nome);
-
-                        return (
-                          <button
-                            type="button"
-                            key={nome}
-                            onClick={() => toggleAcompanhante(nome)}
-                            className={`flex items-center gap-1 rounded-sm border px-2 py-1.5 text-[6px] text-vinho transition md:gap-2 md:px-4 md:py-3 md:text-xs ${
-                              ativo
-                                ? 'border-dourado bg-dourado/15'
-                                : 'border-dourado/40 hover:border-dourado'
-                            }`}
-                          >
-                            <span
-                              className={`flex h-2.5 w-2.5 items-center justify-center border border-dourado text-[6px] text-white md:h-4 md:w-4 md:text-[10px] ${
-                                ativo ? 'bg-dourado' : ''
-                              }`}
-                            >
-                              {ativo && '✓'}
-                            </span>
-
-                            {nome}
-                          </button>
-                        );
-                      })}
-
-                      <input
-                        type="text"
-                        value={rsvp.outroAcompanhante}
-                        onChange={(e) => {
-                          setRsvp({
-                            ...rsvp,
-                            outroAcompanhante: e.target.value,
-                          });
-                        }}
-                        placeholder="Nome do acompanhante"
-                        className="min-w-0 flex-1 rounded-sm border border-dourado/40 bg-transparent px-2 py-1.5 text-[6px] text-vinho placeholder:text-vinho/40 focus:border-dourado focus:outline-none md:min-w-[145px] md:px-4 md:py-3 md:text-xs"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* RESTRIÇÃO ALIMENTAR */}
-                <div>
-                  <p className="font-apoio text-[8px] tracking-wide text-vinho md:text-base">
-                    Há alguma restrição alimentar que devemos considerar?
-                  </p>
-
-                  <p className="mb-1.5 mt-1 text-[6px] text-vinho/70 md:mb-3 md:text-xs">
-                    Conte-nos, se houver. (Opcional)
-                  </p>
-
-                  <textarea
-                    rows={2}
-                    value={rsvp.restricao}
-                    onChange={(e) => {
-                      setRsvp({
-                        ...rsvp,
-                        restricao: e.target.value,
-                      });
-                    }}
-                    placeholder="Digite aqui..."
-                    className="w-full resize-none rounded-sm border border-dourado/40 bg-transparent p-2 text-[7px] text-vinho placeholder:text-vinho/40 focus:border-dourado focus:outline-none md:p-3 md:text-xs"
-                  />
-                </div>
-
-                {/* RAMO + FRASE */}
-                <div className="flex items-center gap-1.5 md:gap-5">
-                  <img
-                    src={ilustracaoRamo}
-                    alt=""
-                    className="h-8 w-auto shrink-0 object-contain mix-blend-darken md:h-20"
-                  />
-
-                  <p className="text-[9px] italic leading-snug text-dourado md:text-xl">
-                    Será uma alegria ter você conosco.
-                  </p>
-                </div>
-
-                {/* BOTÃO */}
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    className="bg-dourado px-4 py-2 font-apoio text-[6px] tracking-[0.16em] text-[#F5EEE4] transition hover:opacity-90 md:px-10 md:py-4 md:text-[10px] md:tracking-[0.25em]"
-                  >
-                    CONFIRMAR PRESENÇA &nbsp;→
-                  </button>
-                </div>
-              </form>
-
-              {/* CONFIRMAÇÃO */}
-              {enviado && (
-                <div className="mt-6 border-t border-dourado/30 pt-5 md:mt-14 md:pt-8">
-                  <div className="relative rounded-sm border border-dourado/40 px-3 pb-4 pt-5 text-center md:px-10 md:pb-8 md:pt-10">
-                    <div className="absolute -top-2 left-1/2 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border border-dourado bg-[#E9DFD3] text-[7px] text-dourado md:-top-3 md:h-6 md:w-6 md:text-xs">
-                      ✓
-                    </div>
-
-                    <p className="font-apoio text-[6px] tracking-[0.16em] text-vinho md:text-[10px] md:tracking-[0.3em]">
-                      PRESENÇA CONFIRMADA!
-                    </p>
-
-                    <p className="mt-2 text-[6px] text-vinho/80 md:mt-3 md:text-xs">
-                      Estamos muito felizes em compartilhar esse momento com você.
-                    </p>
-
-                    <p className="mt-1 text-[6px] italic text-vinho/80 md:mt-2 md:text-xs">
-                      Nos vemos em 17 de janeiro. ♥
-                    </p>
-                  </div>
-                </div>
-              )}
+        {/* CONTAINER CENTRALIZADO (Para telas pequenas será max-w-md, para grandes max-w-2xl) */}
+        <div className="relative z-10 mx-auto w-full max-w-md px-8 md:max-w-3xl md:px-12">
+          
+          {/* CABEÇALHO (100% da largura, perfeitamente centralizado) */}
+          <div className="text-center mb-10 w-full">
+            <div className="flex justify-center mb-4">
+              <MonogramaIR className="h-6 w-9 md:h-8 md:w-11" />
             </div>
-
-            {/* FLOR RSVP: inteira no lado direito */}
-            <div className="relative w-[38%] bg-[#E9DFD3] md:w-[42%]">
-              <img
-                src={ilustracaoRSVP}
-                alt="Ilustração floral da confirmação de presença"
-                className="absolute inset-0 h-full w-full object-cover object-top mix-blend-darken"
-              />
-            </div>
+            <p className="font-apoio text-[10px] md:text-xs tracking-[0.3em] text-vinho/70 mb-2">
+              RSVP
+            </p>
+            <h2 className="text-3xl md:text-5xl font-light leading-tight tracking-[0.08em] text-dourado">
+              CONFIRME SUA<br />PRESENÇA
+            </h2>
+            <p className="mt-3 text-xs md:text-sm italic text-vinho/80">
+              Sua presença tornará esse dia ainda mais especial.
+            </p>
+            <p className="mt-2 font-apoio text-[9px] md:text-[10px] tracking-[0.2em] text-vinho/70">
+              ATÉ 10 DE NOVEMBRO DE 2026
+            </p>
+            <div className="mx-auto mt-6 h-px w-16 bg-dourado/40" />
           </div>
+
+          {/* SAUDAÇÃO E FORMULÁRIO */}
+<div className="flex w-full flex-col">
+
+  {/* Saudação */}
+<div className="mb-8 w-full text-center">
+  <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
+    Isabella,
+  </h3>
+  <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
+    queremos muito celebrar este dia ao seu lado.
+  </p>
+
+  <div className="flex flex-col items-center gap-2 font-apoio text-[9px] tracking-[0.25em] text-vinho/80 md:text-[11px]">
+    <div className="flex items-center gap-2">
+      <CalendarIcon className="h-3.5 w-3.5 text-dourado" />
+      <span>17 DE JANEIRO DE 2027 &nbsp;·&nbsp; 16H</span>
+    </div>
+    <div className="flex items-center gap-2">
+      <PinIcon className="h-3.5 w-3.5 text-dourado" />
+      <span>SERRA DOS CRISTAIS</span>
+    </div>
+  </div>
+</div>
+
+  {/* Formulário */}
+  <form id="form-rsvp" onSubmit={handleSubmitRsvp} className="w-full space-y-6 pb-6">
+
+    {/* Você estará conosco? */}
+    <div className="w-full text-left">
+      <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
+        Você estará conosco?
+      </p>
+      <div className="flex w-full flex-col gap-2.5 md:flex-row">
+        {[
+          { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
+          { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
+        ].map((op) => {
+          const ativo = rsvp.presenca === op.valor;
+          return (
+            <button
+              type="button"
+              key={op.valor}
+              onClick={() => setRsvp({ ...rsvp, presenca: op.valor })}
+              className={`flex w-full flex-1 items-center justify-start gap-3 rounded-md border px-3 py-3 font-apoio text-[9px] tracking-[0.1em] transition md:text-[10px] ${
+                ativo
+                  ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+                  : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+              }`}
+            >
+              <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors ${ativo ? 'border-dourado' : 'border-dourado/40'}`}>
+                {ativo && <div className="h-1.5 w-1.5 rounded-full bg-[#A48255]" />}
+              </div>
+              {op.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Quem estará conosco? */}
+    {rsvp.presenca === 'sim' && (
+      <div className="w-full text-left">
+        <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
+          Quem estará conosco?
+        </p>
+        <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
+          Selecione os nomes dos acompanhantes (se houver).
+        </p>
+        <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
+          {['Isabella', 'Rafael'].map((nome) => {
+            const ativo = rsvp.acompanhantes.includes(nome);
+            return (
+              <button
+                type="button"
+                key={nome}
+                onClick={() => toggleAcompanhante(nome)}
+                className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
+                  ativo
+                    ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+                    : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+                }`}
+              >
+                <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
+                  ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
+                }`}>
+                  <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                {nome}
+              </button>
+            );
+          })}
+
+          {/* Acompanhante extra */}
+<div className="flex w-full items-center gap-2 rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] transition-colors focus-within:border-dourado/60 md:w-auto md:flex-1 md:text-xs">
+            <div className="h-3 w-3 shrink-0 rounded-[2px] border border-dourado/40 bg-transparent" />
+            <input
+              type="text"
+              value={rsvp.outroAcompanhante}
+              onChange={(e) => setRsvp({ ...rsvp, outroAcompanhante: e.target.value })}
+              placeholder="Nome do acompanhante"
+              className="w-full bg-transparent text-vinho placeholder:text-vinho/40 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Restrição alimentar */}
+    <div className="w-full text-left">
+      <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
+        Há alguma restrição alimentar que devemos considerar?
+      </p>
+      <p className="mb-2 text-[10px] text-vinho/70 md:text-[11px]">
+        Conte-nos, se houver. (Opcional)
+      </p>
+      <textarea
+        rows={3}
+        value={rsvp.restricao}
+        onChange={(e) => setRsvp({ ...rsvp, restricao: e.target.value })}
+        placeholder="Digite aqui..."
+className="w-full resize-none rounded-md border border-dourado/30 bg-[#E9DFD3]/60 p-3 text-[11px] text-vinho placeholder:text-vinho/40 focus:border-dourado/60 focus:outline-none md:text-xs"
+      />
+    </div>
+  </form>
+</div>
+
+          {/* RAMO, FRASE FINAL E BOTÃO (Centralizados no meio da tela) */}
+          <div className="mt-8 flex flex-col items-center justify-center w-full relative z-20">
+            <div className="flex items-center bg-[#E9DFD3] justify-center gap-3 mb-6">
+              <img
+                src={ilustracaoRamo}
+                alt="Ramo dourado decorativo"
+                className="h-5 md:h-6 w-auto object-contain mix-blend-darken"
+              />
+              <p className="text-[14px] md:text-base italic text-dourado leading-tight">
+                Será uma alegria ter você conosco.
+              </p>
+            </div>
+
+            <button
+  type="submit"
+  form="form-rsvp"
+  className="rounded-md bg-[#A48255] px-8 py-3.5 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] shadow-sm transition hover:bg-[#8c6b41] md:text-[10px]"
+>
+  CONFIRMAR PRESENÇA &nbsp;→
+</button>
+          </div>
+
+          {/* CAIXA DE CONFIRMAÇÃO */}
+          {enviado && (
+            <div className="relative mt-16 w-full md:w-[85%] mx-auto">
+              <div className="w-full h-[1px] bg-dourado/30 mb-8" />
+              
+              <div className="relative rounded-md border border-dourado/30 bg-transparent px-4 pb-6 pt-8 text-center mx-auto w-full">
+                <div className="absolute -top-3.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-dourado/50 bg-[#E9DFD3] text-[#A48255]">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="font-apoio text-[10px] md:text-[12px] tracking-[0.2em] text-vinho mb-2">
+                  PRESENÇA CONFIRMADA!
+                </p>
+                <p className="text-[10px] md:text-xs text-vinho/80 mb-1.5">
+                  Estamos muito felizes em compartilhar esse momento com você.
+                </p>
+                <p className="text-[10px] md:text-xs italic text-vinho/80">
+                  Nos vemos em 17 de janeiro. ♥
+                </p>
+              </div>
+            </div>
+          )}
+
         </div>
       </section>
     </div>

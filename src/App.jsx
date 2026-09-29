@@ -5,6 +5,10 @@ import ilustracaoHistoria from './assets/02_Nossa_Historia__floral_direita.png';
 import ilustracaoRSVP from './assets/03_Lista_Presenca__floral_direita.png';
 import ilustracaoRamo from './assets/03_Lista_Presenca__ramo_dourado_com_linha.png';
 import monogramaIR from './assets/01_Capa__monograma.png';
+import ilustracaoCerimoniaFlor from './assets/04_Cerimonia__flor_topo_direita.png';
+import ilustracaoLocal from './assets/04_Cerimonia__local.png';
+import ilustracaoMapa from './assets/04_Cerimonia__mapa.png';
+import ilustracaoFolhagem from './assets/04_Cerimonia__folhagem_canto.png';
 
 function MonogramaIR({ className = '' }) {
   return (
@@ -29,6 +33,62 @@ const PinIcon = ({ className }) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
   </svg>
 );
+
+const ClockIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.3} stroke="currentColor" className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
+  </svg>
+);
+
+const CarIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.3} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 16v2m14-2v2M3 13l2-6h14l2 6v3H3v-3Z" />
+    <circle cx="7.5" cy="13.5" r="0.8" />
+    <circle cx="16.5" cy="13.5" r="0.8" />
+  </svg>
+);
+
+const BedIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.3} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 18V6m0 8h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5M7 11.5a1.5 1.5 0 1 0 0-.01" />
+  </svg>
+);
+
+const LeafIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.3} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21V9m0 4c-3 0-5-2-5-5 3 0 5 2 5 5Zm0-2c0-3 2-5 5-5 0 3-2 5-5 5Zm0-4c0-2 1-3 2-4-1 0-2 1-2 4Z" />
+  </svg>
+);
+
+const MapIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.3} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14" />
+  </svg>
+);
+
+const informacoes = [
+  {
+    icone: ClockIcon,
+    titulo: 'HORÁRIO DE CHEGADA',
+    texto: 'Recomendamos que os convidados cheguem com pelo menos 30 minutos de antecedência para aproveitar o momento da cerimônia.',
+  },
+  {
+    icone: CarIcon,
+    titulo: 'ESTACIONAMENTO',
+    texto: 'O local possui estacionamento no próprio espaço, com fácil acesso e sinalização no dia do evento.',
+  },
+  {
+    icone: BedIcon,
+    titulo: 'HOSPEDAGEM',
+    texto: 'Para quem deseja se hospedar, sugerimos os hotéis próximos a Jundiaí. Em breve, compartilharemos uma lista de opções com todos.',
+  },
+  {
+    icone: LeafIcon,
+    titulo: 'OUTRAS ORIENTAÇÕES',
+    texto: 'O evento será realizado ao ar livre, em um ambiente rodeado pela natureza. Recomendamos roupas confortáveis e, se possível, levar um casaquinho para a noite.',
+  },
+];
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -114,6 +174,7 @@ function App() {
           <a href="#inicio" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">INÍCIO</a>
           <a href="#historia" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">NOSSA HISTÓRIA</a>
           <a href="#rsvp" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">PRESENÇA</a>
+          <a href="#cerimonia" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">CERIMÔNIA</a>
           <a href="#presentes" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">LISTA DE PRESENTES</a>
           <a href="#mensagens" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">MENSAGENS</a>
         </nav>
@@ -402,6 +463,146 @@ className="w-full resize-none rounded-md border border-dourado/30 bg-[#E9DFD3]/6
 
         </div>
       </section>
+{/* CERIMÔNIA */}
+<section
+  id="cerimonia"
+  className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
+>
+  {/* Flor no topo direito */}
+  <img
+    src={ilustracaoCerimoniaFlor}
+    alt=""
+    aria-hidden="true"
+    className="pointer-events-none absolute right-0 top-0 z-0 w-[22%] max-w-[10rem] mix-blend-darken md:w-[14%]"
+  />
+
+  {/* Folhagem no canto inferior esquerdo */}
+  <img
+    src={ilustracaoFolhagem}
+    alt=""
+    aria-hidden="true"
+    className="pointer-events-none absolute bottom-0 left-0 z-0 w-[26%] max-w-[12rem] mix-blend-darken md:w-[15%]"
+  />
+
+  <div className="relative z-10 mx-auto w-full max-w-md px-6 md:max-w-5xl md:px-12">
+
+    {/* CABEÇALHO */}
+    <div className="mb-8 text-center md:mb-12">
+      <div className="mb-4 flex justify-center">
+        <MonogramaIR className="h-6 w-9 md:h-8 md:w-11" />
+      </div>
+      <div className="mx-auto mb-6 h-px w-20 bg-dourado/40" />
+
+      <p className="font-apoio text-[10px] tracking-[0.3em] text-vinho/70 md:text-sm">
+        CASAMENTO
+      </p>
+      <h2 className="mt-2 text-2xl font-light leading-tight tracking-[0.08em] text-dourado md:text-5xl">
+        17 DE JANEIRO DE 2027
+      </h2>
+      <p className="mt-3 font-apoio text-[9px] tracking-[0.3em] text-vinho/70 md:text-xs">
+        ÀS 16 HORAS
+      </p>
+
+      <div className="mx-auto my-6 h-px w-20 bg-dourado/40" />
+
+      <h3 className="text-2xl italic text-dourado md:text-4xl">Serra dos Cristais</h3>
+      <p className="mt-2 font-apoio text-[9px] tracking-[0.3em] text-vinho/70 md:text-xs">
+        JUNDIAÍ · SÃO PAULO
+      </p>
+    </div>
+
+    {/* ILUSTRAÇÃO DO LOCAL */}
+    <div className="-mx-6 mb-10 bg-[#E9DFD3] md:mx-0 md:mb-16">
+      <img
+        src={ilustracaoLocal}
+        alt="Ilustração do local da cerimônia, Serra dos Cristais"
+        className="w-full object-contain mix-blend-darken"
+      />
+    </div>
+
+    {/* COMO CHEGAR */}
+<div className="mb-10 flex flex-row items-center bg-[#E9DFD3] gap-3 md:mb-16 md:gap-10">
+  <div className="w-1/2">
+    <div className="mb-3 flex bg-[#E9DFD3] items-center gap-2 md:mb-4 md:gap-3">
+      <div className="h-px bg-[#E9DFD3] w-4 bg-dourado/60 md:w-8" />
+      <h3 className="text-base italic text-dourado md:text-3xl">Como chegar</h3>
+    </div>
+
+    <div className="mb-3 flex bg-[#E9DFD3] items-start gap-2 md:mb-5 md:gap-3">
+      <PinIcon className="mt-0.5 h-3 w-3 shrink-0 text-dourado md:h-4 md:w-4" />
+      <p className="text-[9px] leading-snug text-vinho md:text-base md:leading-relaxed">
+        Rod. Pres. Tancredo de Almeida Neves, 861
+        <br />
+        Jundiaí — SP
+      </p>
+    </div>
+
+    <a
+      href="https://www.google.com/maps/search/?api=1&query=Rod.+Pres.+Tancredo+de+Almeida+Neves,+861,+Jundiaí+-+SP"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 rounded-md border border-dourado/50 px-2.5 py-2 font-apoio text-[7px] tracking-[0.15em] text-dourado transition hover:bg-dourado/10 md:gap-3 md:px-5 md:py-3 md:text-[10px] md:tracking-[0.2em]"
+    >
+      <MapIcon className="h-3 w-3 md:h-4 md:w-4" />
+      ABRIR NO MAPA
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+
+  <div className="w-1/2 overflow-hidden bg-[#E9DFD3] rounded-md border border-dourado/30">
+    <img
+      src={ilustracaoMapa}
+      alt="Mapa de localização"
+      className="h-full w-full object-cover"
+    />
+  </div>
+</div>
+
+{/* INFORMAÇÕES IMPORTANTES */}
+<div className="mb-10">
+  <div className="mb-6 flex items-center gap-3 md:mb-8 md:gap-4">
+    <div className="h-px flex-1 bg-dourado/30" />
+    <h3 className="text-sm italic text-dourado md:text-3xl">Informações importantes</h3>
+    <div className="h-px flex-1 bg-dourado/30" />
+  </div>
+
+  <div className="grid grid-cols-4">
+    {informacoes.map((info, i) => {
+      const Icone = info.icone;
+      return (
+        <div
+          key={info.titulo}
+          className={`flex flex-col items-center px-1.5 text-center md:px-5 ${
+            i > 0 ? 'border-l border-dourado/20' : ''
+          }`}
+        >
+          <Icone className="mb-2 h-4 w-4 text-dourado md:mb-3 md:h-6 md:w-6" />
+          <p className="mb-2 font-apoio text-[5.5px] leading-tight tracking-[0.08em] text-vinho md:mb-3 md:text-[10px] md:tracking-[0.15em]">
+            {info.titulo}
+          </p>
+          <p className="text-[6.5px] leading-snug text-vinho/80 md:text-xs md:leading-relaxed">
+            {info.texto}
+          </p>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+    {/* FRASE FINAL */}
+    <div className="text-center">
+      <p className="text-sm italic bg-[#E9DFD3] text-dourado md:text-lg">
+        Será um privilégio ter você conosco neste dia tão especial.
+      </p>
+      <div className="mx-auto mt-6 flex items-center justify-center gap-3">
+        <div className="h-px w-12 bg-dourado/40" />
+        <LeafIcon className="h-4 w-4 text-dourado" />
+        <div className="h-px w-12 bg-dourado/40" />
+      </div>
+    </div>
+  </div>
+</section>
+
     </div>
   );
 }

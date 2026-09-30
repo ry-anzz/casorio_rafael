@@ -4,23 +4,25 @@ import ilustracaoCapa from './assets/01_Capa__floral_principal.png';
 import ilustracaoHistoria from './assets/02_Nossa_Historia__floral_direita.png';
 import ilustracaoRSVP from './assets/03_Lista_Presenca__floral_direita.png';
 import ilustracaoRamo from './assets/03_Lista_Presenca__ramo_dourado_com_linha.png';
-import monogramaIR from './assets/01_Capa__monograma.png';
+import MonogramaIR from './components/MonogramaIR';
 import ilustracaoCerimoniaFlor from './assets/04_Cerimonia__flor_topo_direita.png';
 import ilustracaoLocal from './assets/04_Cerimonia__local.png';
 import ilustracaoMapa from './assets/04_Cerimonia__mapa.png';
 import ilustracaoFolhagem from './assets/04_Cerimonia__folhagem_canto.png';
+import { Link } from 'react-router-dom';
+import ilustracaoCalla from './assets/06_Presentes_Apresentacao__flor_pequena.png';
+import ilustracaoLirio from './assets/08_Mensagens__lirio.png';
 
-function MonogramaIR({ className = '' }) {
-  return (
-    <img
-      src={monogramaIR}
-      alt="Isabella e Rafael"
-      className={`object-contain mix-blend-darken ${className}`}
-    />
-  );
-}
+
 
 // Ícones minimalistas para Data e Local
+
+const LinkedinIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z" />
+  </svg>
+);
+
 const CalendarIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -114,6 +116,19 @@ function useContagem(alvo) {
 }
 
 function App() {
+
+const [mensagem, setMensagem] = useState({ nome: '', texto: '' });
+const [mensagemEnviada, setMensagemEnviada] = useState(false);
+
+const handleSubmitMensagem = (e) => {
+  e.preventDefault();
+  if (!mensagem.nome.trim() || !mensagem.texto.trim()) return;
+  console.log('Mensagem:', mensagem);
+  // Integração com Supabase/API aqui
+  setMensagemEnviada(true);
+  setMensagem({ nome: '', texto: '' });
+};
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [rsvp, setRsvp] = useState({
@@ -673,6 +688,182 @@ const unidades = [
   {/* Espaçador para manter o contador centralizado verticalmente */}
   <div className="h-[3.5rem]" aria-hidden="true" />
 </section>
+
+{/* LISTA DE PRESENTES */}
+<section
+  id="presentes"
+  className="relative overflow-hidden bg-[#E9DFD3] px-6 py-20 md:py-28"
+>
+  <div className="mx-auto flex max-w-md flex-col items-center text-center md:max-w-2xl">
+    <MonogramaIR className="mb-10 h-9 w-12 md:h-12 md:w-16" />
+
+    <h2 className="text-3xl font-light leading-snug tracking-[0.25em] text-dourado md:text-5xl">
+      LISTA DE<br />PRESENTES
+    </h2>
+
+    <div className="my-8 h-px w-16 bg-dourado/50" />
+
+    <p className="mb-6 text-[15px] italic leading-relaxed tracking-wide text-vinho/80 md:text-xl">
+      A presença de vocês no nosso casamento
+      <br />
+      já é, para nós, o maior presente.
+    </p>
+
+    <p className="mb-10 text-[15px] italic leading-relaxed tracking-wide text-vinho/80 md:text-xl">
+      Mas, para quem desejar nos presentear,
+      <br />
+      preparamos uma lista com carinho para
+      <br />
+      a nossa nova casa e para os próximos
+      <br />
+      capítulos da nossa história.
+    </p>
+
+    <Link
+      to="/presentes"
+      className="flex w-full items-center justify-center gap-3 border border-dourado/70 px-4 py-4 font-apoio text-[9px] tracking-[0.2em] text-dourado transition hover:bg-dourado/10 md:w-auto md:px-10 md:text-xs"
+    >
+      ACESSAR NOSSA LISTA DE PRESENTES
+      <span aria-hidden="true">→</span>
+    </Link>
+
+    <img
+      src={ilustracaoCalla}
+      alt=""
+      aria-hidden="true"
+      className="mt-12 h-16 w-auto object-contain mix-blend-darken md:h-20"
+    />
+
+    <p className="mt-6 text-sm italic text-vinho/80 md:text-base">Com carinho,</p>
+    <p className="mt-2 font-apoio text-[11px] tracking-[0.3em] text-dourado md:text-sm">
+      ISABELLA &amp; RAFAEL
+    </p>
+  </div>
+</section>
+
+{/* MENSAGENS */}
+<section
+  id="mensagens"
+  className="relative overflow-hidden bg-[#EFE7DC]  px-6 py-20 md:py-28"
+>
+  <div className="mx-auto flex max-w-md flex-col inset-0 object-contain mix-blend-darken bg-[#EFE7DC] items-center text-center md:max-w-3xl">
+    <MonogramaIR className="mb-10 h-9 w-12  md:h-12 bg-[#EFE7DC] md:w-16" />
+
+    <h2 className="text-3xl font-light bg-[#EFE7DC] leading-snug tracking-[0.2em] text-dourado md:text-5xl">
+      UMA MENSAGEM<br />PARA NÓS
+    </h2>
+
+    <div className="my-8 h-px w-16 bg-dourado/50" />
+
+    <p className="mb-5 text-[15px] italic tracking-wide text-vinho/80 md:text-xl">
+      Deixe um pedacinho de carinho para nós.
+    </p>
+    <p className="mb-12 text-[13px] leading-relaxed tracking-wide text-vinho/80 md:text-base">
+      Suas palavras serão muito especiais e
+      <br />
+      farão parte das nossas lembranças para sempre.
+    </p>
+
+    {/* LIVRO / CARTÃO */}
+    <div className="relative w-full">
+      {/* Lombada */}
+      <div className="absolute -left-1 top-0 z-10 h-full w-3 rounded-l-md bg-gradient-to-r from-[#E3D8C8] via-[#F3ECE0] to-[#E3D8C8] shadow-md md:w-4" />
+
+      <form
+        onSubmit={handleSubmitMensagem}
+        className="relative ml-2 rounded-r-md border border-dourado/20 bg-[#F3ECE0] px-6 pb-12 pt-8 text-left shadow-[0_6px_18px_rgba(120,90,50,0.15)] md:ml-3 md:px-14 md:pb-16 md:pt-12"
+      >
+        <label className="block font-apoio text-[8px] tracking-[0.3em] text-vinho/70 md:text-[10px]">
+          SEU NOME
+        </label>
+        <input
+          type="text"
+          value={mensagem.nome}
+          onChange={(e) => setMensagem({ ...mensagem, nome: e.target.value })}
+          className="mb-8 mt-2 w-full border-b border-dourado/50 bg-transparent pb-2 text-sm text-vinho focus:border-dourado focus:outline-none md:text-base"
+        />
+
+        <label className="block font-apoio text-[8px] tracking-[0.3em] text-vinho/70 md:text-[10px]">
+          SUA MENSAGEM PARA NÓS
+        </label>
+        <textarea
+          rows={4}
+          value={mensagem.texto}
+          onChange={(e) => setMensagem({ ...mensagem, texto: e.target.value })}
+          className="mt-1 w-full resize-none bg-transparent text-sm text-vinho focus:outline-none md:text-base"
+          style={{
+            lineHeight: '2rem',
+            backgroundAttachment: 'local',
+            backgroundImage:
+              'repeating-linear-gradient(transparent, transparent calc(2rem - 1px), rgba(164,130,85,0.5) calc(2rem - 1px), rgba(164,130,85,0.5) 2rem)',
+          }}
+        />
+
+        <div className="mt-8 flex justify-center">
+          <button
+            type="submit"
+            className="flex items-center gap-3 border border-dourado/70 px-6 py-3 font-apoio text-[8px] tracking-[0.25em] text-dourado transition hover:bg-dourado/10 md:px-10 md:py-4 md:text-[11px]"
+          >
+            ENVIAR MENSAGEM
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        {mensagemEnviada && (
+          <p className="mt-5 text-center text-xs italic text-dourado md:text-sm">
+            Mensagem enviada. Muito obrigado pelo carinho! ♥
+          </p>
+        )}
+      </form>
+
+      {/* Lírio no canto do livro */}
+      <img
+        src={ilustracaoLirio}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-6 -right-3 z-20 w-16 mix-blend-darken md:-bottom-10 md:-right-6 md:w-28"
+      />
+    </div>
+
+    {/* FECHAMENTO */}
+    <div className="mt-14 flex w-full items-center justify-center gap-3">
+      <div className="h-px w-16 bg-dourado/40 md:w-28" />
+      <span className="text-xs text-dourado" aria-hidden="true">✦</span>
+      <div className="h-px w-16 bg-dourado/40 md:w-28" />
+    </div>
+
+    <p className="mt-6 text-[13px] italic leading-relaxed text-vinho/80 md:text-base">
+      Sua mensagem fará parte das nossas
+      <br />
+      lembranças para sempre.
+    </p>
+
+    <p className="mt-8 font-apoio text-[11px] tracking-[0.3em] text-vinho/80 md:text-sm">
+      ISABELLA &amp; RAFAEL
+    </p>
+    <p className="mt-2 font-apoio text-[9px] tracking-[0.3em] text-vinho/60 md:text-xs">
+      17.01.2027
+    </p>
+  </div>
+</section>
+
+{/* FOOTER */}
+<footer className="border-t border-dourado/20 bg-[#E3D8C8] px-6 py-6">
+  <div className="mx-auto flex max-w-md flex-col items-center gap-2 text-center md:max-w-3xl md:flex-row md:justify-between">
+    <p className="font-apoio text-[9px] tracking-[0.2em] text-vinho/70 md:text-[11px]">
+      DESENVOLVIDO POR RYAN VICENTE DE OLIVEIRA
+    </p>
+    <a
+      href="https://www.linkedin.com/in/ryan-vicente-de-oliveira-83422725a"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="LinkedIn de Ryan Vicente de Oliveira"
+      className="text-vinho/70 transition hover:text-dourado"
+    >
+      <LinkedinIcon className="h-5 w-5" />
+    </a>
+  </div>
+</footer>
 
     </div>
   );

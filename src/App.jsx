@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import ilustracaoCapa from './assets/01_Capa__floral_principal.png';
 import ilustracaoHistoria from './assets/02_Nossa_Historia__floral_direita.png';
@@ -90,6 +90,29 @@ const informacoes = [
   },
 ];
 
+const DATA_CASAMENTO = new Date('2027-01-17T16:00:00-03:00');
+
+function useContagem(alvo) {
+  const calcular = () => {
+    const diff = Math.max(0, alvo.getTime() - Date.now());
+    return {
+      dias: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      horas: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      minutos: Math.floor((diff / (1000 * 60)) % 60),
+      segundos: Math.floor((diff / 1000) % 60),
+    };
+  };
+
+  const [tempo, setTempo] = useState(calcular);
+
+  useEffect(() => {
+    const id = setInterval(() => setTempo(calcular()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return tempo;
+}
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -117,6 +140,15 @@ function App() {
     // Integração com Supabase/API aqui
     setEnviado(true);
   };
+
+  const tempo = useContagem(DATA_CASAMENTO);
+
+const unidades = [
+  { valor: tempo.dias, label: 'DIAS' },
+  { valor: tempo.horas, label: 'HORAS' },
+  { valor: tempo.minutos, label: 'MINUTOS' },
+  { valor: tempo.segundos, label: 'SEGUNDOS' },
+];
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#E9DFD3] text-vinho font-principal">
@@ -173,8 +205,9 @@ function App() {
         <nav className="flex flex-col space-y-8 text-center font-apoio text-sm tracking-[0.2em] text-vinho/80">
           <a href="#inicio" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">INÍCIO</a>
           <a href="#historia" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">NOSSA HISTÓRIA</a>
-          <a href="#rsvp" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">PRESENÇA</a>
           <a href="#cerimonia" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">CERIMÔNIA</a>
+          <a href="#rsvp" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">PRESENÇA</a>
+          <a href="#contagem" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">CONTAGEM REGRESSIVA</a>
           <a href="#presentes" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">LISTA DE PRESENTES</a>
           <a href="#mensagens" onClick={() => setIsSidebarOpen(false)} className="transition hover:text-dourado">MENSAGENS</a>
         </nav>
@@ -249,221 +282,7 @@ function App() {
         </div>
       </section>
 
-      {/* RSVP (FORMULÁRIO FULL-WIDTH E FLOR PEQUENA NO CANTO) */}
-      {/* RSVP (AJUSTADO PARA MOBILE) */}
-      <section
-        id="rsvp"
-        className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
-      >
-{/* FLOR FIXADA NO CANTO INFERIOR DIREITO */}
-<div className="pointer-events-none bg-[#E9DFD3] absolute bottom-[4%] right-0 z-0 w-[34%] md:w-[24%]">
-  <img
-    src={ilustracaoRSVP}
-    alt="Flor Calla Lily"
-    className="w-full translate-x-[22%] object-contain object-bottom opacity-95 mix-blend-darken"
-  />
-</div>
-
-        {/* CONTAINER CENTRALIZADO (Para telas pequenas será max-w-md, para grandes max-w-2xl) */}
-        <div className="relative z-10 mx-auto w-full max-w-md px-8 md:max-w-3xl md:px-12">
-          
-          {/* CABEÇALHO (100% da largura, perfeitamente centralizado) */}
-          <div className="text-center mb-10 w-full">
-            <div className="flex justify-center mb-4">
-              <MonogramaIR className="h-6 w-9 md:h-8 md:w-11" />
-            </div>
-            <p className="font-apoio text-[10px] md:text-xs tracking-[0.3em] text-vinho/70 mb-2">
-              RSVP
-            </p>
-            <h2 className="text-3xl md:text-5xl font-light leading-tight tracking-[0.08em] text-dourado">
-              CONFIRME SUA<br />PRESENÇA
-            </h2>
-            <p className="mt-3 text-xs md:text-sm italic text-vinho/80">
-              Sua presença tornará esse dia ainda mais especial.
-            </p>
-            <p className="mt-2 font-apoio text-[9px] md:text-[10px] tracking-[0.2em] text-vinho/70">
-              ATÉ 10 DE NOVEMBRO DE 2026
-            </p>
-            <div className="mx-auto mt-6 h-px w-16 bg-dourado/40" />
-          </div>
-
-          {/* SAUDAÇÃO E FORMULÁRIO */}
-<div className="flex w-full flex-col">
-
-  {/* Saudação */}
-<div className="mb-8 w-full text-center">
-  <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
-    Isabella,
-  </h3>
-  <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
-    queremos muito celebrar este dia ao seu lado.
-  </p>
-
-  <div className="flex flex-col items-center gap-2 font-apoio text-[9px] tracking-[0.25em] text-vinho/80 md:text-[11px]">
-    <div className="flex items-center gap-2">
-      <CalendarIcon className="h-3.5 w-3.5 text-dourado" />
-      <span>17 DE JANEIRO DE 2027 &nbsp;·&nbsp; 16H</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <PinIcon className="h-3.5 w-3.5 text-dourado" />
-      <span>SERRA DOS CRISTAIS</span>
-    </div>
-  </div>
-</div>
-
-  {/* Formulário */}
-  <form id="form-rsvp" onSubmit={handleSubmitRsvp} className="w-full space-y-6 pb-6">
-
-    {/* Você estará conosco? */}
-    <div className="w-full text-left">
-      <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
-        Você estará conosco?
-      </p>
-      <div className="flex w-full flex-col gap-2.5 md:flex-row">
-        {[
-          { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
-          { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
-        ].map((op) => {
-          const ativo = rsvp.presenca === op.valor;
-          return (
-            <button
-              type="button"
-              key={op.valor}
-              onClick={() => setRsvp({ ...rsvp, presenca: op.valor })}
-              className={`flex w-full flex-1 items-center justify-start gap-3 rounded-md border px-3 py-3 font-apoio text-[9px] tracking-[0.1em] transition md:text-[10px] ${
-                ativo
-                  ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
-                  : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
-              }`}
-            >
-              <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors ${ativo ? 'border-dourado' : 'border-dourado/40'}`}>
-                {ativo && <div className="h-1.5 w-1.5 rounded-full bg-[#A48255]" />}
-              </div>
-              {op.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-
-    {/* Quem estará conosco? */}
-    {rsvp.presenca === 'sim' && (
-      <div className="w-full text-left">
-        <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
-          Quem estará conosco?
-        </p>
-        <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
-          Selecione os nomes dos acompanhantes (se houver).
-        </p>
-        <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
-          {['Isabella', 'Rafael'].map((nome) => {
-            const ativo = rsvp.acompanhantes.includes(nome);
-            return (
-              <button
-                type="button"
-                key={nome}
-                onClick={() => toggleAcompanhante(nome)}
-                className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
-                  ativo
-                    ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
-                    : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
-                }`}
-              >
-                <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
-                  ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
-                }`}>
-                  <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                {nome}
-              </button>
-            );
-          })}
-
-          {/* Acompanhante extra */}
-<div className="flex w-full items-center gap-2 rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] transition-colors focus-within:border-dourado/60 md:w-auto md:flex-1 md:text-xs">
-            <div className="h-3 w-3 shrink-0 rounded-[2px] border border-dourado/40 bg-transparent" />
-            <input
-              type="text"
-              value={rsvp.outroAcompanhante}
-              onChange={(e) => setRsvp({ ...rsvp, outroAcompanhante: e.target.value })}
-              placeholder="Nome do acompanhante"
-              className="w-full bg-transparent text-vinho placeholder:text-vinho/40 focus:outline-none"
-            />
-          </div>
-        </div>
-      </div>
-    )}
-
-    {/* Restrição alimentar */}
-    <div className="w-full text-left">
-      <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
-        Há alguma restrição alimentar que devemos considerar?
-      </p>
-      <p className="mb-2 text-[10px] text-vinho/70 md:text-[11px]">
-        Conte-nos, se houver. (Opcional)
-      </p>
-      <textarea
-        rows={3}
-        value={rsvp.restricao}
-        onChange={(e) => setRsvp({ ...rsvp, restricao: e.target.value })}
-        placeholder="Digite aqui..."
-className="w-full resize-none rounded-md border border-dourado/30 bg-[#E9DFD3]/60 p-3 text-[11px] text-vinho placeholder:text-vinho/40 focus:border-dourado/60 focus:outline-none md:text-xs"
-      />
-    </div>
-  </form>
-</div>
-
-          {/* RAMO, FRASE FINAL E BOTÃO (Centralizados no meio da tela) */}
-          <div className="mt-8 flex flex-col items-center justify-center w-full relative z-20">
-            <div className="flex items-center bg-[#E9DFD3] justify-center gap-3 mb-6">
-              <img
-                src={ilustracaoRamo}
-                alt="Ramo dourado decorativo"
-                className="h-5 md:h-6 w-auto object-contain mix-blend-darken"
-              />
-              <p className="text-[14px] md:text-base italic text-dourado leading-tight">
-                Será uma alegria ter você conosco.
-              </p>
-            </div>
-
-            <button
-  type="submit"
-  form="form-rsvp"
-  className="rounded-md bg-[#A48255] px-8 py-3.5 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] shadow-sm transition hover:bg-[#8c6b41] md:text-[10px]"
->
-  CONFIRMAR PRESENÇA &nbsp;→
-</button>
-          </div>
-
-          {/* CAIXA DE CONFIRMAÇÃO */}
-          {enviado && (
-            <div className="relative mt-16 w-full md:w-[85%] mx-auto">
-              <div className="w-full h-[1px] bg-dourado/30 mb-8" />
-              
-              <div className="relative rounded-md border border-dourado/30 bg-transparent px-4 pb-6 pt-8 text-center mx-auto w-full">
-                <div className="absolute -top-3.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-dourado/50 bg-[#E9DFD3] text-[#A48255]">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <p className="font-apoio text-[10px] md:text-[12px] tracking-[0.2em] text-vinho mb-2">
-                  PRESENÇA CONFIRMADA!
-                </p>
-                <p className="text-[10px] md:text-xs text-vinho/80 mb-1.5">
-                  Estamos muito felizes em compartilhar esse momento com você.
-                </p>
-                <p className="text-[10px] md:text-xs italic text-vinho/80">
-                  Nos vemos em 17 de janeiro. ♥
-                </p>
-              </div>
-            </div>
-          )}
-
-        </div>
-      </section>
-{/* CERIMÔNIA */}
+      {/* CERIMÔNIA */}
 <section
   id="cerimonia"
   className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
@@ -601,6 +420,258 @@ className="w-full resize-none rounded-md border border-dourado/30 bg-[#E9DFD3]/6
       </div>
     </div>
   </div>
+</section>
+
+      {/* RSVP (FORMULÁRIO FULL-WIDTH E FLOR PEQUENA NO CANTO) */}
+      {/* RSVP (AJUSTADO PARA MOBILE) */}
+      <section
+        id="rsvp"
+        className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
+      >
+{/* FLOR FIXADA NO CANTO INFERIOR DIREITO */}
+<div className="pointer-events-none bg-[#E9DFD3] absolute bottom-[4%] right-0 z-0 w-[34%] md:w-[24%]">
+  <img
+    src={ilustracaoRSVP}
+    alt="Flor Calla Lily"
+    className="w-full translate-x-[22%] object-contain object-bottom opacity-95 mix-blend-darken"
+  />
+</div>
+
+        {/* CONTAINER CENTRALIZADO (Para telas pequenas será max-w-md, para grandes max-w-2xl) */}
+        <div className="relative z-10 mx-auto w-full max-w-md px-8 md:max-w-3xl md:px-12">
+          
+          {/* CABEÇALHO (100% da largura, perfeitamente centralizado) */}
+          <div className="text-center mb-10 w-full">
+            <div className="flex justify-center mb-4">
+              <MonogramaIR className="h-6 w-9 md:h-8 md:w-11" />
+            </div>
+            <p className="font-apoio text-[10px] md:text-xs tracking-[0.3em] text-vinho/70 mb-2">
+              RSVP
+            </p>
+            <h2 className="text-3xl md:text-5xl font-light leading-tight tracking-[0.08em] text-dourado">
+              CONFIRME SUA<br />PRESENÇA
+            </h2>
+            
+            <div className="mx-auto mt-6 h-px w-16 bg-dourado/40" />
+          </div>
+
+          {/* SAUDAÇÃO E FORMULÁRIO */}
+<div className="flex w-full flex-col">
+
+  {/* Saudação */}
+<div className="mb-8 w-full text-center">
+  <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
+    Isabella e Rafael,
+  </h3>
+  <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
+    queremos muito celebrar este dia ao seu lado.
+  </p>
+
+  <div className="flex flex-col items-center gap-2 font-apoio text-[9px] tracking-[0.25em] text-vinho/80 md:text-[11px]">
+    <div className="flex items-center gap-2">
+      <CalendarIcon className="h-3.5 w-3.5 text-dourado" />
+      <span>17 DE JANEIRO DE 2027 &nbsp;·&nbsp; 16H</span>
+    </div>
+    <div className="flex items-center gap-2">
+      <PinIcon className="h-3.5 w-3.5 text-dourado" />
+      <span>SERRA DOS CRISTAIS</span>
+    </div>
+  </div>
+</div>
+
+  {/* Formulário */}
+  <form id="form-rsvp" onSubmit={handleSubmitRsvp} className="w-full space-y-6 pb-6">
+
+    {/* Você estará conosco? */}
+    <div className="w-full text-left">
+      <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
+        Você estará conosco?
+      </p>
+      <div className="flex w-full flex-col gap-2.5 md:flex-row">
+        {[
+          { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
+          { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
+        ].map((op) => {
+          const ativo = rsvp.presenca === op.valor;
+          return (
+            <button
+              type="button"
+              key={op.valor}
+              onClick={() => setRsvp({ ...rsvp, presenca: op.valor })}
+              className={`flex w-full flex-1 items-center justify-start gap-3 rounded-md border px-3 py-3 font-apoio text-[9px] tracking-[0.1em] transition md:text-[10px] ${
+                ativo
+                  ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+                  : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+              }`}
+            >
+              <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors ${ativo ? 'border-dourado' : 'border-dourado/40'}`}>
+                {ativo && <div className="h-1.5 w-1.5 rounded-full bg-[#A48255]" />}
+              </div>
+              {op.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Quem estará conosco? */}
+    {rsvp.presenca === 'sim' && (
+      <div className="w-full text-left">
+        <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
+          Quem estará conosco?
+        </p>
+        <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
+          Selecione os nomes dos acompanhantes (se houver).
+        </p>
+        <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
+          {['Isabella', 'Rafael'].map((nome) => {
+            const ativo = rsvp.acompanhantes.includes(nome);
+            return (
+              <button
+                type="button"
+                key={nome}
+                onClick={() => toggleAcompanhante(nome)}
+                className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
+                  ativo
+                    ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+                    : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+                }`}
+              >
+                <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
+                  ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
+                }`}>
+                  <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                {nome}
+              </button>
+            );
+          })}
+
+          {/* Acompanhante extra */}
+<div className="flex w-full items-center gap-2 rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] transition-colors focus-within:border-dourado/60 md:w-auto md:flex-1 md:text-xs">
+            <div className="h-3 w-3 shrink-0 rounded-[2px] border border-dourado/40 bg-transparent" />
+            <input
+              type="text"
+              value={rsvp.outroAcompanhante}
+              onChange={(e) => setRsvp({ ...rsvp, outroAcompanhante: e.target.value })}
+              placeholder="Nome do acompanhante"
+              className="w-full bg-transparent text-vinho placeholder:text-vinho/40 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+    )}
+
+  </form>
+</div>
+
+          {/* RAMO, FRASE FINAL E BOTÃO (Centralizados no meio da tela) */}
+          <div className="mt-8 flex flex-col items-center justify-center w-full relative z-20">
+            <div className="flex items-center bg-[#E9DFD3] justify-center gap-3 mb-6">
+              <img
+                src={ilustracaoRamo}
+                alt="Ramo dourado decorativo"
+                className="h-5 md:h-6 w-auto object-contain mix-blend-darken"
+              />
+              <p className="text-[14px] md:text-base italic text-dourado leading-tight">
+                Será uma alegria ter você conosco.
+              </p>
+            </div>
+
+            <button
+  type="submit"
+  form="form-rsvp"
+  className="rounded-md bg-[#A48255] px-8 py-3.5 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] shadow-sm transition hover:bg-[#8c6b41] md:text-[10px]"
+>
+  CONFIRMAR PRESENÇA &nbsp;→
+</button>
+          </div>
+
+          {/* CAIXA DE CONFIRMAÇÃO */}
+          {enviado && (
+            <div className="relative mt-16 w-full md:w-[85%] mx-auto">
+              <div className="w-full h-[1px] bg-dourado/30 mb-8" />
+              
+              <div className="relative rounded-md border border-dourado/30 bg-transparent px-4 pb-6 pt-8 text-center mx-auto w-full">
+                <div className="absolute -top-3.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-dourado/50 bg-[#E9DFD3] text-[#A48255]">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="font-apoio text-[10px] md:text-[12px] tracking-[0.2em] text-vinho mb-2">
+                  PRESENÇA CONFIRMADA!
+                </p>
+                <p className="text-[10px] md:text-xs text-vinho/80 mb-1.5">
+                  Estamos muito felizes em compartilhar esse momento com você.
+                </p>
+                <p className="text-[10px] md:text-xs italic text-vinho/80">
+                  Nos vemos em 17 de janeiro. ♥
+                </p>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </section>
+{/* CONTAGEM REGRESSIVA */}
+<section
+  id="contagem"
+  className="relative flex min-h-screen flex-col items-center overflow-hidden bg-[#E9DFD3] py-16"
+>
+  {/* Flor topo esquerda */}
+  <img
+    src={ilustracaoCapa}
+    alt=""
+    aria-hidden="true"
+    className="pointer-events-none absolute left-0 top-0 z-0 w-[50%] max-w-[22rem] -translate-x-[36%] mix-blend-darken md:w-[24%]"
+  />
+
+  {/* Flor base direita */}
+  <img
+    src={ilustracaoRSVP}
+    alt=""
+    aria-hidden="true"
+    className="pointer-events-none absolute bottom-0 right-0 z-0 w-[42%] max-w-[26rem] translate-x-[4%] mix-blend-darken md:w-[26%]"
+  />
+
+  {/* Linhas douradas decorativas */}
+  <div className="pointer-events-none absolute left-[3.5%] top-[2%] h-[26%] w-px bg-dourado/50" />
+  <div className="pointer-events-none absolute bottom-[3%] right-[3.5%] h-[22%] w-px bg-dourado/50" />
+
+  {/* Monograma + linha */}
+  <div className="relative z-10 flex flex-col items-center">
+    <MonogramaIR className="h-9 w-12 md:h-12 md:w-16" />
+    <div className="mt-4 h-px w-16 bg-dourado/50 md:w-20" />
+  </div>
+
+  {/* Contador */}
+  <div className="relative z-10 my-auto flex w-full items-start justify-center px-4 md:px-8">
+    {unidades.map((u, i) => (
+      <React.Fragment key={u.label}>
+        <div className="flex flex-col items-center">
+          <div className="flex h-[4.5rem] w-14 items-center justify-center rounded-lg border border-dourado/20 bg-[#EDE3D6] shadow-[0_2px_6px_rgba(120,90,50,0.15)] md:h-32 md:w-28">
+            <span className="text-[2rem] font-light leading-none text-dourado md:text-7xl">
+              {String(u.valor).padStart(2, '0')}
+            </span>
+          </div>
+          <span className="mt-3 font-apoio text-[6.5px] tracking-[0.2em] text-vinho/70 md:text-xs md:tracking-[0.3em]">
+            {u.label}
+          </span>
+        </div>
+
+        {i < unidades.length - 1 && (
+          <div className="flex h-[4.5rem] w-4 items-center justify-center md:h-32 md:w-10">
+            <span className="h-1 w-1 rounded-full bg-dourado md:h-1.5 md:w-1.5" />
+          </div>
+        )}
+      </React.Fragment>
+    ))}
+  </div>
+
+  {/* Espaçador para manter o contador centralizado verticalmente */}
+  <div className="h-[3.5rem]" aria-hidden="true" />
 </section>
 
     </div>

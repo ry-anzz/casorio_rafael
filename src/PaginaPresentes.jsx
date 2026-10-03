@@ -1,25 +1,13 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MonogramaIR from './components/MonogramaIR';
-
+import { categorias, contarItens } from './data/presentes';
 import imgRamoTopo from './assets/07_Presentes__ramo_topo.png';
-import imgCozinha from './assets/07_Presentes__cozinha.png';
-import imgLavanderia from './assets/07_Presentes__lavanderia.png';
-import imgBanheiros from './assets/07_Presentes__banheiros.png';
-import imgQuarto from './assets/07_Presentes__quarto.png';
-import imgSala from './assets/07_Presentes__sala.png';
-import imgExperiencias from './assets/07_Presentes__experiencias.png';
+
 import imgPaisagem from './assets/07_Presentes__paisagem_rodape.png';
 import imgRamoRodape from './assets/07_Presentes__ramo_rodape_direita.png';
 
-const categorias = [
-  { slug: 'cozinha', nome: 'COZINHA', qtd: '31 PRESENTES', img: imgCozinha },
-  { slug: 'lavanderia', nome: 'LAVANDERIA', qtd: '5 PRESENTES', img: imgLavanderia },
-  { slug: 'banheiros', nome: 'BANHEIROS', qtd: '7 PRESENTES', img: imgBanheiros },
-  { slug: 'quarto', nome: 'QUARTO', qtd: '10 PRESENTES', img: imgQuarto },
-  { slug: 'sala', nome: 'SALA DE ESTAR & JANTAR', qtd: '11 PRESENTES', img: imgSala },
-  { slug: 'experiencias', nome: 'EXPERIÊNCIAS & LUA DE MEL', qtd: '16 COTAS', img: imgExperiencias },
-];
+
 
 export default function PaginaPresentes() {
   useEffect(() => {
@@ -82,8 +70,8 @@ export default function PaginaPresentes() {
                 </h3>
                 <div className="my-2 h-px w-6 bg-dourado/60 md:my-3 md:w-10" />
                 <p className="font-apoio text-[6px] tracking-[0.12em] text-vinho/70 md:text-xs md:tracking-[0.15em]">
-                  {cat.qtd}
-                </p>
+  {contarItens(cat.slug)} {cat.unidade}
+</p>
               </div>
 
               <span className="text-sm text-dourado transition group-hover:translate-x-1 md:text-2xl" aria-hidden="true">

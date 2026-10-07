@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 import ilustracaoCapa from './assets/01_Capa__floral_principal.png';
 import ilustracaoHistoria from './assets/02_Nossa_Historia__floral_direita.png';
@@ -9,14 +10,10 @@ import ilustracaoCerimoniaFlor from './assets/04_Cerimonia__flor_topo_direita.pn
 import ilustracaoLocal from './assets/04_Cerimonia__local.png';
 import ilustracaoMapa from './assets/04_Cerimonia__mapa.png';
 import ilustracaoFolhagem from './assets/04_Cerimonia__folhagem_canto.png';
-import { Link } from 'react-router-dom';
 import ilustracaoCalla from './assets/06_Presentes_Apresentacao__flor_pequena.png';
 import ilustracaoLirio from './assets/08_Mensagens__lirio.png';
 
-
-
-// Ícones minimalistas para Data e Local
-
+// ---------- ÍCONES ----------
 const LinkedinIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
     <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z" />
@@ -69,6 +66,7 @@ const MapIcon = ({ className }) => (
   </svg>
 );
 
+// ---------- DADOS ----------
 const informacoes = [
   {
     icone: ClockIcon,
@@ -115,29 +113,20 @@ function useContagem(alvo) {
   return tempo;
 }
 
+const formatarData = (iso) =>
+  new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+// ---------- APP ----------
 function App() {
-
-const [mensagem, setMensagem] = useState({ nome: '', texto: '' });
-const [mensagemEnviada, setMensagemEnviada] = useState(false);
-
-const handleSubmitMensagem = (e) => {
-  e.preventDefault();
-  if (!mensagem.nome.trim() || !mensagem.texto.trim()) return;
-  console.log('Mensagem:', mensagem);
-  // Integração com Supabase/API aqui
-  setMensagemEnviada(true);
-  setMensagem({ nome: '', texto: '' });
-};
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // RSVP
   const [rsvp, setRsvp] = useState({
     presenca: 'sim',
     acompanhantes: ['Isabella'],
     outroAcompanhante: '',
     restricao: '',
   });
-
   const [enviado, setEnviado] = useState(false);
 
   const toggleAcompanhante = (nome) => {
@@ -156,14 +145,60 @@ const handleSubmitMensagem = (e) => {
     setEnviado(true);
   };
 
-  const tempo = useContagem(DATA_CASAMENTO);
+  // Mensagens
+  const [mensagem, setMensagem] = useState({ nome: '', texto: '', site: '' });
+  const [mensagemEnviada, setMensagemEnviada] = useState(false);
+  const [enviandoMensagem, setEnviandoMensagem] = useState(false);
+  const [erroMensagem, setErroMensagem] = useState('');
+  const [listaMensagens, setListaMensagens] = useState([]);
+  const [modalMensagens, setModalMensagens] = useState(false);
 
-const unidades = [
-  { valor: tempo.dias, label: 'DIAS' },
-  { valor: tempo.horas, label: 'HORAS' },
-  { valor: tempo.minutos, label: 'MINUTOS' },
-  { valor: tempo.segundos, label: 'SEGUNDOS' },
-];
+  const carregarMensagens = () => {
+    fetch('/api/mensagens')
+      .then((r) => r.json())
+      .then((d) => setListaMensagens(d.mensagens || []))
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    carregarMensagens();
+  }, []);
+
+  const handleSubmitMensagem = async (e) => {
+    e.preventDefault();
+    if (!mensagem.nome.trim() || !mensagem.texto.trim()) {
+      setErroMensagem('Preencha o seu nome e a mensagem.');
+      return;
+    }
+    setErroMensagem('');
+    setMensagemEnviada(false);
+    setEnviandoMensagem(true);
+
+    try {
+      const r = await fetch('/api/mensagens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mensagem),
+      });
+      if (!r.ok) throw new Error();
+      setMensagemEnviada(true);
+      setMensagem({ nome: '', texto: '', site: '' });
+      carregarMensagens();
+    } catch {
+      setErroMensagem('Não foi possível enviar. Tente novamente.');
+    } finally {
+      setEnviandoMensagem(false);
+    }
+  };
+
+  // Contagem regressiva
+  const tempo = useContagem(DATA_CASAMENTO);
+  const unidades = [
+    { valor: tempo.dias, label: 'DIAS' },
+    { valor: tempo.horas, label: 'HORAS' },
+    { valor: tempo.minutos, label: 'MINUTOS' },
+    { valor: tempo.segundos, label: 'SEGUNDOS' },
+  ];
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#E9DFD3] text-vinho font-principal">
@@ -298,573 +333,658 @@ const unidades = [
       </section>
 
       {/* CERIMÔNIA */}
-<section
-  id="cerimonia"
-  className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
->
-  {/* Flor no topo direito */}
-  <img
-    src={ilustracaoCerimoniaFlor}
-    alt=""
-    aria-hidden="true"
-    className="pointer-events-none absolute right-0 top-0 z-0 w-[22%] max-w-[10rem] mix-blend-darken md:w-[14%]"
-  />
+      <section
+        id="cerimonia"
+        className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
+      >
+        <img
+          src={ilustracaoCerimoniaFlor}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 top-0 z-0 w-[22%] max-w-[10rem] mix-blend-darken md:w-[14%]"
+        />
 
-  {/* Folhagem no canto inferior esquerdo */}
-  <img
-    src={ilustracaoFolhagem}
-    alt=""
-    aria-hidden="true"
-    className="pointer-events-none absolute bottom-0 left-0 z-0 w-[26%] max-w-[12rem] mix-blend-darken md:w-[15%]"
-  />
+        <img
+          src={ilustracaoFolhagem}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-0 z-0 w-[26%] max-w-[12rem] mix-blend-darken md:w-[15%]"
+        />
 
-  <div className="relative z-10 mx-auto w-full max-w-md px-6 md:max-w-5xl md:px-12">
+        <div className="relative z-10 mx-auto w-full max-w-md px-6 md:max-w-5xl md:px-12">
 
-    {/* CABEÇALHO */}
-    <div className="mb-8 text-center md:mb-12">
-      <div className="mb-4 flex justify-center">
-        <MonogramaIR className="h-6 w-9 md:h-8 md:w-11" />
-      </div>
-      <div className="mx-auto mb-6 h-px w-20 bg-dourado/40" />
+          {/* CABEÇALHO */}
+          <div className="mb-8 text-center md:mb-12">
+            <div className="mb-4 flex justify-center">
+              <MonogramaIR className="h-6 w-9 md:h-8 md:w-11" />
+            </div>
+            <div className="mx-auto mb-6 h-px w-20 bg-dourado/40" />
 
-      <p className="font-apoio text-[10px] tracking-[0.3em] text-vinho/70 md:text-sm">
-        CASAMENTO
-      </p>
-      <h2 className="mt-2 text-2xl font-light leading-tight tracking-[0.08em] text-dourado md:text-5xl">
-        17 DE JANEIRO DE 2027
-      </h2>
-      <p className="mt-3 font-apoio text-[9px] tracking-[0.3em] text-vinho/70 md:text-xs">
-        ÀS 16 HORAS
-      </p>
+            <p className="font-apoio text-[10px] tracking-[0.3em] text-vinho/70 md:text-sm">
+              CASAMENTO
+            </p>
+            <h2 className="mt-2 text-2xl font-light leading-tight tracking-[0.08em] text-dourado md:text-5xl">
+              17 DE JANEIRO DE 2027
+            </h2>
+            <p className="mt-3 font-apoio text-[9px] tracking-[0.3em] text-vinho/70 md:text-xs">
+              ÀS 16 HORAS
+            </p>
 
-      <div className="mx-auto my-6 h-px w-20 bg-dourado/40" />
+            <div className="mx-auto my-6 h-px w-20 bg-dourado/40" />
 
-      <h3 className="text-2xl italic text-dourado md:text-4xl">Serra dos Cristais</h3>
-      <p className="mt-2 font-apoio text-[9px] tracking-[0.3em] text-vinho/70 md:text-xs">
-        JUNDIAÍ · SÃO PAULO
-      </p>
-    </div>
+            <h3 className="text-2xl italic text-dourado md:text-4xl">Serra dos Cristais</h3>
+            <p className="mt-2 font-apoio text-[9px] tracking-[0.3em] text-vinho/70 md:text-xs">
+              JUNDIAÍ · SÃO PAULO
+            </p>
+          </div>
 
-    {/* ILUSTRAÇÃO DO LOCAL */}
-    <div className="-mx-6 mb-10 bg-[#E9DFD3] md:mx-0 md:mb-16">
-      <img
-        src={ilustracaoLocal}
-        alt="Ilustração do local da cerimônia, Serra dos Cristais"
-        className="w-full object-contain mix-blend-darken"
-      />
-    </div>
+          {/* ILUSTRAÇÃO DO LOCAL */}
+          <div className="-mx-6 mb-10 bg-[#E9DFD3] md:mx-0 md:mb-16">
+            <img
+              src={ilustracaoLocal}
+              alt="Ilustração do local da cerimônia, Serra dos Cristais"
+              className="w-full object-contain mix-blend-darken"
+            />
+          </div>
 
-    {/* COMO CHEGAR */}
-<div className="mb-10 flex flex-row items-center bg-[#E9DFD3] gap-3 md:mb-16 md:gap-10">
-  <div className="w-1/2">
-    <div className="mb-3 flex bg-[#E9DFD3] items-center gap-2 md:mb-4 md:gap-3">
-      <div className="h-px bg-[#E9DFD3] w-4 bg-dourado/60 md:w-8" />
-      <h3 className="text-base italic text-dourado md:text-3xl">Como chegar</h3>
-    </div>
+          {/* COMO CHEGAR */}
+          <div className="mb-10 flex flex-row items-center gap-3 bg-[#E9DFD3] md:mb-16 md:gap-10">
+            <div className="w-1/2">
+              <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-3">
+                <div className="h-px w-4 bg-dourado/60 md:w-8" />
+                <h3 className="text-base italic text-dourado md:text-3xl">Como chegar</h3>
+              </div>
 
-    <div className="mb-3 flex bg-[#E9DFD3] items-start gap-2 md:mb-5 md:gap-3">
-      <PinIcon className="mt-0.5 h-3 w-3 shrink-0 text-dourado md:h-4 md:w-4" />
-      <p className="text-[9px] leading-snug text-vinho md:text-base md:leading-relaxed">
-        Rod. Pres. Tancredo de Almeida Neves, 861
-        <br />
-        Jundiaí — SP
-      </p>
-    </div>
+              <div className="mb-3 flex items-start gap-2 md:mb-5 md:gap-3">
+                <PinIcon className="mt-0.5 h-3 w-3 shrink-0 text-dourado md:h-4 md:w-4" />
+                <p className="text-[9px] leading-snug text-vinho md:text-base md:leading-relaxed">
+                  Rod. Pres. Tancredo de Almeida Neves, 861
+                  <br />
+                  Jundiaí — SP
+                </p>
+              </div>
 
-    <a
-      href="https://www.google.com/maps/search/?api=1&query=Rod.+Pres.+Tancredo+de+Almeida+Neves,+861,+Jundiaí+-+SP"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 rounded-md border border-dourado/50 px-2.5 py-2 font-apoio text-[7px] tracking-[0.15em] text-dourado transition hover:bg-dourado/10 md:gap-3 md:px-5 md:py-3 md:text-[10px] md:tracking-[0.2em]"
-    >
-      <MapIcon className="h-3 w-3 md:h-4 md:w-4" />
-      ABRIR NO MAPA
-      <span aria-hidden="true">→</span>
-    </a>
-  </div>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Rod.+Pres.+Tancredo+de+Almeida+Neves,+861,+Jundiaí+-+SP"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-dourado/50 px-2.5 py-2 font-apoio text-[7px] tracking-[0.15em] text-dourado transition hover:bg-dourado/10 md:gap-3 md:px-5 md:py-3 md:text-[10px] md:tracking-[0.2em]"
+              >
+                <MapIcon className="h-3 w-3 md:h-4 md:w-4" />
+                ABRIR NO MAPA
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
 
-  <div className="w-1/2 overflow-hidden bg-[#E9DFD3] rounded-md border border-dourado/30">
-    <img
-      src={ilustracaoMapa}
-      alt="Mapa de localização"
-      className="h-full w-full object-cover"
-    />
-  </div>
-</div>
+            <div className="w-1/2 overflow-hidden rounded-md border border-dourado/30 bg-[#E9DFD3]">
+              <img
+                src={ilustracaoMapa}
+                alt="Mapa de localização"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
 
-{/* INFORMAÇÕES IMPORTANTES */}
-<div className="mb-10">
-  <div className="mb-6 flex items-center gap-3 md:mb-8 md:gap-4">
-    <div className="h-px flex-1 bg-dourado/30" />
-    <h3 className="text-sm italic text-dourado md:text-3xl">Informações importantes</h3>
-    <div className="h-px flex-1 bg-dourado/30" />
-  </div>
+          {/* INFORMAÇÕES IMPORTANTES */}
+          <div className="mb-10">
+            <div className="mb-6 flex items-center gap-3 md:mb-8 md:gap-4">
+              <div className="h-px flex-1 bg-dourado/30" />
+              <h3 className="text-sm italic text-dourado md:text-3xl">Informações importantes</h3>
+              <div className="h-px flex-1 bg-dourado/30" />
+            </div>
 
-  <div className="grid grid-cols-4">
-    {informacoes.map((info, i) => {
-      const Icone = info.icone;
-      return (
-        <div
-          key={info.titulo}
-          className={`flex flex-col items-center px-1.5 text-center md:px-5 ${
-            i > 0 ? 'border-l border-dourado/20' : ''
-          }`}
-        >
-          <Icone className="mb-2 h-4 w-4 text-dourado md:mb-3 md:h-6 md:w-6" />
-          <p className="mb-2 font-apoio text-[5.5px] leading-tight tracking-[0.08em] text-vinho md:mb-3 md:text-[10px] md:tracking-[0.15em]">
-            {info.titulo}
-          </p>
-          <p className="text-[6.5px] leading-snug text-vinho/80 md:text-xs md:leading-relaxed">
-            {info.texto}
-          </p>
+            <div className="grid grid-cols-4">
+              {informacoes.map((info, i) => {
+                const Icone = info.icone;
+                return (
+                  <div
+                    key={info.titulo}
+                    className={`flex flex-col items-center px-1.5 text-center md:px-5 ${
+                      i > 0 ? 'border-l border-dourado/20' : ''
+                    }`}
+                  >
+                    <Icone className="mb-2 h-4 w-4 text-dourado md:mb-3 md:h-6 md:w-6" />
+                    <p className="mb-2 font-apoio text-[5.5px] leading-tight tracking-[0.08em] text-vinho md:mb-3 md:text-[10px] md:tracking-[0.15em]">
+                      {info.titulo}
+                    </p>
+                    <p className="text-[6.5px] leading-snug text-vinho/80 md:text-xs md:leading-relaxed">
+                      {info.texto}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* FRASE FINAL */}
+          <div className="text-center">
+            <p className="bg-[#E9DFD3] text-sm italic text-dourado md:text-lg">
+              Será um privilégio ter você conosco neste dia tão especial.
+            </p>
+            <div className="mx-auto mt-6 flex items-center justify-center gap-3">
+              <div className="h-px w-12 bg-dourado/40" />
+              <LeafIcon className="h-4 w-4 text-dourado" />
+              <div className="h-px w-12 bg-dourado/40" />
+            </div>
+          </div>
         </div>
-      );
-    })}
-  </div>
-</div>
+      </section>
 
-    {/* FRASE FINAL */}
-    <div className="text-center">
-      <p className="text-sm italic bg-[#E9DFD3] text-dourado md:text-lg">
-        Será um privilégio ter você conosco neste dia tão especial.
-      </p>
-      <div className="mx-auto mt-6 flex items-center justify-center gap-3">
-        <div className="h-px w-12 bg-dourado/40" />
-        <LeafIcon className="h-4 w-4 text-dourado" />
-        <div className="h-px w-12 bg-dourado/40" />
-      </div>
-    </div>
-  </div>
-</section>
-
-      {/* RSVP (FORMULÁRIO FULL-WIDTH E FLOR PEQUENA NO CANTO) */}
-      {/* RSVP (AJUSTADO PARA MOBILE) */}
+      {/* RSVP */}
       <section
         id="rsvp"
         className="relative overflow-hidden bg-[#E9DFD3] py-16 md:py-24"
       >
-{/* FLOR FIXADA NO CANTO INFERIOR DIREITO */}
-<div className="pointer-events-none bg-[#E9DFD3] absolute bottom-[4%] right-0 z-0 w-[34%] md:w-[24%]">
-  <img
-    src={ilustracaoRSVP}
-    alt="Flor Calla Lily"
-    className="w-full translate-x-[22%] object-contain object-bottom opacity-95 mix-blend-darken"
-  />
-</div>
+        <div className="pointer-events-none absolute bottom-[4%] right-0 z-0 w-[34%] bg-[#E9DFD3] md:w-[24%]">
+          <img
+            src={ilustracaoRSVP}
+            alt="Flor Calla Lily"
+            className="w-full translate-x-[22%] object-contain object-bottom opacity-95 mix-blend-darken"
+          />
+        </div>
 
-        {/* CONTAINER CENTRALIZADO (Para telas pequenas será max-w-md, para grandes max-w-2xl) */}
         <div className="relative z-10 mx-auto w-full max-w-md px-8 md:max-w-3xl md:px-12">
-          
-          {/* CABEÇALHO (100% da largura, perfeitamente centralizado) */}
-          <div className="text-center mb-10 w-full">
-            <div className="flex justify-center mb-4">
+
+          {/* CABEÇALHO */}
+          <div className="mb-10 w-full text-center">
+            <div className="mb-4 flex justify-center">
               <MonogramaIR className="h-6 w-9 md:h-8 md:w-11" />
             </div>
-            <p className="font-apoio text-[10px] md:text-xs tracking-[0.3em] text-vinho/70 mb-2">
+            <p className="mb-2 font-apoio text-[10px] tracking-[0.3em] text-vinho/70 md:text-xs">
               RSVP
             </p>
-            <h2 className="text-3xl md:text-5xl font-light leading-tight tracking-[0.08em] text-dourado">
+            <h2 className="text-3xl font-light leading-tight tracking-[0.08em] text-dourado md:text-5xl">
               CONFIRME SUA<br />PRESENÇA
             </h2>
-            
+
             <div className="mx-auto mt-6 h-px w-16 bg-dourado/40" />
           </div>
 
           {/* SAUDAÇÃO E FORMULÁRIO */}
-<div className="flex w-full flex-col">
+          <div className="flex w-full flex-col">
 
-  {/* Saudação */}
-<div className="mb-8 w-full text-center">
-  <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
-    Isabella e Rafael,
-  </h3>
-  <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
-    queremos muito celebrar este dia ao seu lado.
-  </p>
+            <div className="mb-8 w-full text-center">
+              <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
+                Isabella e Rafael,
+              </h3>
+              <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
+                queremos muito celebrar este dia ao seu lado.
+              </p>
 
-  <div className="flex flex-col items-center gap-2 font-apoio text-[9px] tracking-[0.25em] text-vinho/80 md:text-[11px]">
-    <div className="flex items-center gap-2">
-      <CalendarIcon className="h-3.5 w-3.5 text-dourado" />
-      <span>17 DE JANEIRO DE 2027 &nbsp;·&nbsp; 16H</span>
-    </div>
-    <div className="flex items-center gap-2">
-      <PinIcon className="h-3.5 w-3.5 text-dourado" />
-      <span>SERRA DOS CRISTAIS</span>
-    </div>
-  </div>
-</div>
-
-  {/* Formulário */}
-  <form id="form-rsvp" onSubmit={handleSubmitRsvp} className="w-full space-y-6 pb-6">
-
-    {/* Você estará conosco? */}
-    <div className="w-full text-left">
-      <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
-        Você estará conosco?
-      </p>
-      <div className="flex w-full flex-col gap-2.5 md:flex-row">
-        {[
-          { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
-          { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
-        ].map((op) => {
-          const ativo = rsvp.presenca === op.valor;
-          return (
-            <button
-              type="button"
-              key={op.valor}
-              onClick={() => setRsvp({ ...rsvp, presenca: op.valor })}
-              className={`flex w-full flex-1 items-center justify-start gap-3 rounded-md border px-3 py-3 font-apoio text-[9px] tracking-[0.1em] transition md:text-[10px] ${
-                ativo
-                  ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
-                  : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
-              }`}
-            >
-              <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors ${ativo ? 'border-dourado' : 'border-dourado/40'}`}>
-                {ativo && <div className="h-1.5 w-1.5 rounded-full bg-[#A48255]" />}
-              </div>
-              {op.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-
-    {/* Quem estará conosco? */}
-    {rsvp.presenca === 'sim' && (
-      <div className="w-full text-left">
-        <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
-          Quem estará conosco?
-        </p>
-        <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
-          Selecione os nomes dos acompanhantes (se houver).
-        </p>
-        <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
-          {['Isabella', 'Rafael'].map((nome) => {
-            const ativo = rsvp.acompanhantes.includes(nome);
-            return (
-              <button
-                type="button"
-                key={nome}
-                onClick={() => toggleAcompanhante(nome)}
-                className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
-                  ativo
-                    ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
-                    : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
-                }`}
-              >
-                <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
-                  ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
-                }`}>
-                  <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
+              <div className="flex flex-col items-center gap-2 font-apoio text-[9px] tracking-[0.25em] text-vinho/80 md:text-[11px]">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-3.5 w-3.5 text-dourado" />
+                  <span>17 DE JANEIRO DE 2027 &nbsp;·&nbsp; 16H</span>
                 </div>
-                {nome}
-              </button>
-            );
-          })}
+                <div className="flex items-center gap-2">
+                  <PinIcon className="h-3.5 w-3.5 text-dourado" />
+                  <span>SERRA DOS CRISTAIS</span>
+                </div>
+              </div>
+            </div>
 
-          {/* Acompanhante extra */}
-<div className="flex w-full items-center gap-2 rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] transition-colors focus-within:border-dourado/60 md:w-auto md:flex-1 md:text-xs">
-            <div className="h-3 w-3 shrink-0 rounded-[2px] border border-dourado/40 bg-transparent" />
-            <input
-              type="text"
-              value={rsvp.outroAcompanhante}
-              onChange={(e) => setRsvp({ ...rsvp, outroAcompanhante: e.target.value })}
-              placeholder="Nome do acompanhante"
-              className="w-full bg-transparent text-vinho placeholder:text-vinho/40 focus:outline-none"
-            />
+            <form id="form-rsvp" onSubmit={handleSubmitRsvp} className="w-full space-y-6 pb-6">
+
+              {/* Você estará conosco? */}
+              <div className="w-full text-left">
+                <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
+                  Você estará conosco?
+                </p>
+                <div className="flex w-full flex-col gap-2.5 md:flex-row">
+                  {[
+                    { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
+                    { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
+                  ].map((op) => {
+                    const ativo = rsvp.presenca === op.valor;
+                    return (
+                      <button
+                        type="button"
+                        key={op.valor}
+                        onClick={() => setRsvp({ ...rsvp, presenca: op.valor })}
+                        className={`flex w-full flex-1 items-center justify-start gap-3 rounded-md border px-3 py-3 font-apoio text-[9px] tracking-[0.1em] transition md:text-[10px] ${
+                          ativo
+                            ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+                            : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+                        }`}
+                      >
+                        <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors ${ativo ? 'border-dourado' : 'border-dourado/40'}`}>
+                          {ativo && <div className="h-1.5 w-1.5 rounded-full bg-[#A48255]" />}
+                        </div>
+                        {op.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Quem estará conosco? */}
+              {rsvp.presenca === 'sim' && (
+                <div className="w-full text-left">
+                  <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
+                    Quem estará conosco?
+                  </p>
+                  <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
+                    Selecione os nomes dos acompanhantes (se houver).
+                  </p>
+                  <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
+                    {['Isabella', 'Rafael'].map((nome) => {
+                      const ativo = rsvp.acompanhantes.includes(nome);
+                      return (
+                        <button
+                          type="button"
+                          key={nome}
+                          onClick={() => toggleAcompanhante(nome)}
+                          className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
+                            ativo
+                              ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+                              : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+                          }`}
+                        >
+                          <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
+                            ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
+                          }`}>
+                            <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          {nome}
+                        </button>
+                      );
+                    })}
+
+                    {/* Acompanhante extra */}
+                    <div className="flex w-full items-center gap-2 rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] transition-colors focus-within:border-dourado/60 md:w-auto md:flex-1 md:text-xs">
+                      <div className="h-3 w-3 shrink-0 rounded-[2px] border border-dourado/40 bg-transparent" />
+                      <input
+                        type="text"
+                        value={rsvp.outroAcompanhante}
+                        onChange={(e) => setRsvp({ ...rsvp, outroAcompanhante: e.target.value })}
+                        placeholder="Nome do acompanhante"
+                        className="w-full bg-transparent text-vinho placeholder:text-vinho/40 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </form>
           </div>
-        </div>
-      </div>
-    )}
 
-  </form>
-</div>
-
-          {/* RAMO, FRASE FINAL E BOTÃO (Centralizados no meio da tela) */}
-          <div className="mt-8 flex flex-col items-center justify-center w-full relative z-20">
-            <div className="flex items-center bg-[#E9DFD3] justify-center gap-3 mb-6">
+          {/* RAMO, FRASE FINAL E BOTÃO */}
+          <div className="relative z-20 mt-8 flex w-full flex-col items-center justify-center">
+            <div className="mb-6 flex items-center justify-center gap-3 bg-[#E9DFD3]">
               <img
                 src={ilustracaoRamo}
                 alt="Ramo dourado decorativo"
-                className="h-5 md:h-6 w-auto object-contain mix-blend-darken"
+                className="h-5 w-auto object-contain mix-blend-darken md:h-6"
               />
-              <p className="text-[14px] md:text-base italic text-dourado leading-tight">
+              <p className="text-[14px] italic leading-tight text-dourado md:text-base">
                 Será uma alegria ter você conosco.
               </p>
             </div>
 
             <button
-  type="submit"
-  form="form-rsvp"
-  className="rounded-md bg-[#A48255] px-8 py-3.5 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] shadow-sm transition hover:bg-[#8c6b41] md:text-[10px]"
->
-  CONFIRMAR PRESENÇA &nbsp;→
-</button>
+              type="submit"
+              form="form-rsvp"
+              className="rounded-md bg-[#A48255] px-8 py-3.5 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] shadow-sm transition hover:bg-[#8c6b41] md:text-[10px]"
+            >
+              CONFIRMAR PRESENÇA &nbsp;→
+            </button>
           </div>
 
           {/* CAIXA DE CONFIRMAÇÃO */}
           {enviado && (
-            <div className="relative mt-16 w-full md:w-[85%] mx-auto">
-              <div className="w-full h-[1px] bg-dourado/30 mb-8" />
-              
-              <div className="relative rounded-md border border-dourado/30 bg-transparent px-4 pb-6 pt-8 text-center mx-auto w-full">
+            <div className="relative mx-auto mt-16 w-full md:w-[85%]">
+              <div className="mb-8 h-[1px] w-full bg-dourado/30" />
+
+              <div className="relative mx-auto w-full rounded-md border border-dourado/30 bg-transparent px-4 pb-6 pt-8 text-center">
                 <div className="absolute -top-3.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-dourado/50 bg-[#E9DFD3] text-[#A48255]">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="font-apoio text-[10px] md:text-[12px] tracking-[0.2em] text-vinho mb-2">
+                <p className="mb-2 font-apoio text-[10px] tracking-[0.2em] text-vinho md:text-[12px]">
                   PRESENÇA CONFIRMADA!
                 </p>
-                <p className="text-[10px] md:text-xs text-vinho/80 mb-1.5">
+                <p className="mb-1.5 text-[10px] text-vinho/80 md:text-xs">
                   Estamos muito felizes em compartilhar esse momento com você.
                 </p>
-                <p className="text-[10px] md:text-xs italic text-vinho/80">
+                <p className="text-[10px] italic text-vinho/80 md:text-xs">
                   Nos vemos em 17 de janeiro. ♥
                 </p>
               </div>
             </div>
           )}
-
         </div>
       </section>
-{/* CONTAGEM REGRESSIVA */}
-<section
-  id="contagem"
-  className="relative flex min-h-screen flex-col items-center overflow-hidden bg-[#E9DFD3] py-16"
->
-  {/* Flor topo esquerda */}
-  <img
-    src={ilustracaoCapa}
-    alt=""
-    aria-hidden="true"
-    className="pointer-events-none absolute left-0 top-0 z-0 w-[50%] max-w-[22rem] -translate-x-[36%] mix-blend-darken md:w-[24%]"
-  />
 
-  {/* Flor base direita */}
-  <img
-    src={ilustracaoRSVP}
-    alt=""
-    aria-hidden="true"
-    className="pointer-events-none absolute bottom-0 right-0 z-0 w-[42%] max-w-[26rem] translate-x-[4%] mix-blend-darken md:w-[26%]"
-  />
-
-  {/* Linhas douradas decorativas */}
-  <div className="pointer-events-none absolute left-[3.5%] top-[2%] h-[26%] w-px bg-dourado/50" />
-  <div className="pointer-events-none absolute bottom-[3%] right-[3.5%] h-[22%] w-px bg-dourado/50" />
-
-  {/* Monograma + linha */}
-  <div className="relative z-10 flex flex-col items-center">
-    <MonogramaIR className="h-9 w-12 md:h-12 md:w-16" />
-    <div className="mt-4 h-px w-16 bg-dourado/50 md:w-20" />
-  </div>
-
-  {/* Contador */}
-  <div className="relative z-10 my-auto flex w-full items-start justify-center px-4 md:px-8">
-    {unidades.map((u, i) => (
-      <React.Fragment key={u.label}>
-        <div className="flex flex-col items-center">
-          <div className="flex h-[4.5rem] w-14 items-center justify-center rounded-lg border border-dourado/20 bg-[#EDE3D6] shadow-[0_2px_6px_rgba(120,90,50,0.15)] md:h-32 md:w-28">
-            <span className="text-[2rem] font-light leading-none text-dourado md:text-7xl">
-              {String(u.valor).padStart(2, '0')}
-            </span>
-          </div>
-          <span className="mt-3 font-apoio text-[6.5px] tracking-[0.2em] text-vinho/70 md:text-xs md:tracking-[0.3em]">
-            {u.label}
-          </span>
-        </div>
-
-        {i < unidades.length - 1 && (
-          <div className="flex h-[4.5rem] w-4 items-center justify-center md:h-32 md:w-10">
-            <span className="h-1 w-1 rounded-full bg-dourado md:h-1.5 md:w-1.5" />
-          </div>
-        )}
-      </React.Fragment>
-    ))}
-  </div>
-
-  {/* Espaçador para manter o contador centralizado verticalmente */}
-  <div className="h-[3.5rem]" aria-hidden="true" />
-</section>
-
-{/* LISTA DE PRESENTES */}
-<section
-  id="presentes"
-  className="relative overflow-hidden bg-[#E9DFD3] px-6 py-20 md:py-28"
->
-  <div className="mx-auto flex max-w-md flex-col items-center text-center md:max-w-2xl">
-    <MonogramaIR className="mb-10 h-9 w-12 md:h-12 md:w-16" />
-
-    <h2 className="text-3xl font-light leading-snug tracking-[0.25em] text-dourado md:text-5xl">
-      LISTA DE<br />PRESENTES
-    </h2>
-
-    <div className="my-8 h-px w-16 bg-dourado/50" />
-
-    <p className="mb-6 text-[15px] italic leading-relaxed tracking-wide text-vinho/80 md:text-xl">
-      A presença de vocês no nosso casamento
-      <br />
-      já é, para nós, o maior presente.
-    </p>
-
-    <p className="mb-10 text-[15px] italic leading-relaxed tracking-wide text-vinho/80 md:text-xl">
-      Mas, para quem desejar nos presentear,
-      <br />
-      preparamos uma lista com carinho para
-      <br />
-      a nossa nova casa e para os próximos
-      <br />
-      capítulos da nossa história.
-    </p>
-
-    <Link
-      to="/presentes"
-      className="flex w-full items-center justify-center gap-3 border border-dourado/70 px-4 py-4 font-apoio text-[9px] tracking-[0.2em] text-dourado transition hover:bg-dourado/10 md:w-auto md:px-10 md:text-xs"
-    >
-      ACESSAR NOSSA LISTA DE PRESENTES
-      <span aria-hidden="true">→</span>
-    </Link>
-
-    <img
-      src={ilustracaoCalla}
-      alt=""
-      aria-hidden="true"
-      className="mt-12 h-16 w-auto object-contain mix-blend-darken md:h-20"
-    />
-
-    <p className="mt-6 text-sm italic text-vinho/80 md:text-base">Com carinho,</p>
-    <p className="mt-2 font-apoio text-[11px] tracking-[0.3em] text-dourado md:text-sm">
-      ISABELLA &amp; RAFAEL
-    </p>
-  </div>
-</section>
-
-{/* MENSAGENS */}
-<section
-  id="mensagens"
-  className="relative overflow-hidden bg-[#EFE7DC]  px-6 py-20 md:py-28"
->
-  <div className="mx-auto flex max-w-md flex-col inset-0 object-contain mix-blend-darken bg-[#EFE7DC] items-center text-center md:max-w-3xl">
-    <MonogramaIR className="mb-10 h-9 w-12  md:h-12 bg-[#EFE7DC] md:w-16" />
-
-    <h2 className="text-3xl font-light bg-[#EFE7DC] leading-snug tracking-[0.2em] text-dourado md:text-5xl">
-      UMA MENSAGEM<br />PARA NÓS
-    </h2>
-
-    <div className="my-8 h-px w-16 bg-dourado/50" />
-
-    <p className="mb-5 text-[15px] italic tracking-wide text-vinho/80 md:text-xl">
-      Deixe um pedacinho de carinho para nós.
-    </p>
-    <p className="mb-12 text-[13px] leading-relaxed tracking-wide text-vinho/80 md:text-base">
-      Suas palavras serão muito especiais e
-      <br />
-      farão parte das nossas lembranças para sempre.
-    </p>
-
-    {/* LIVRO / CARTÃO */}
-    <div className="relative w-full">
-      {/* Lombada */}
-      <div className="absolute -left-1 top-0 z-10 h-full w-3 rounded-l-md bg-gradient-to-r from-[#E3D8C8] via-[#F3ECE0] to-[#E3D8C8] shadow-md md:w-4" />
-
-      <form
-        onSubmit={handleSubmitMensagem}
-        className="relative ml-2 rounded-r-md border border-dourado/20 bg-[#F3ECE0] px-6 pb-12 pt-8 text-left shadow-[0_6px_18px_rgba(120,90,50,0.15)] md:ml-3 md:px-14 md:pb-16 md:pt-12"
+      {/* CONTAGEM REGRESSIVA */}
+      <section
+        id="contagem"
+        className="relative flex min-h-screen flex-col items-center overflow-hidden bg-[#E9DFD3] py-16"
       >
-        <label className="block font-apoio text-[8px] tracking-[0.3em] text-vinho/70 md:text-[10px]">
-          SEU NOME
-        </label>
-        <input
-          type="text"
-          value={mensagem.nome}
-          onChange={(e) => setMensagem({ ...mensagem, nome: e.target.value })}
-          className="mb-8 mt-2 w-full border-b border-dourado/50 bg-transparent pb-2 text-sm text-vinho focus:border-dourado focus:outline-none md:text-base"
+        <img
+          src={ilustracaoCapa}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 z-0 w-[50%] max-w-[22rem] -translate-x-[36%] mix-blend-darken md:w-[24%]"
         />
 
-        <label className="block font-apoio text-[8px] tracking-[0.3em] text-vinho/70 md:text-[10px]">
-          SUA MENSAGEM PARA NÓS
-        </label>
-        <textarea
-          rows={4}
-          value={mensagem.texto}
-          onChange={(e) => setMensagem({ ...mensagem, texto: e.target.value })}
-          className="mt-1 w-full resize-none bg-transparent text-sm text-vinho focus:outline-none md:text-base"
-          style={{
-            lineHeight: '2rem',
-            backgroundAttachment: 'local',
-            backgroundImage:
-              'repeating-linear-gradient(transparent, transparent calc(2rem - 1px), rgba(164,130,85,0.5) calc(2rem - 1px), rgba(164,130,85,0.5) 2rem)',
-          }}
+        <img
+          src={ilustracaoRSVP}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 right-0 z-0 w-[42%] max-w-[26rem] translate-x-[4%] mix-blend-darken md:w-[26%]"
         />
 
-        <div className="mt-8 flex justify-center">
-          <button
-            type="submit"
-            className="flex items-center gap-3 border border-dourado/70 px-6 py-3 font-apoio text-[8px] tracking-[0.25em] text-dourado transition hover:bg-dourado/10 md:px-10 md:py-4 md:text-[11px]"
-          >
-            ENVIAR MENSAGEM
-            <span aria-hidden="true">→</span>
-          </button>
+        <div className="pointer-events-none absolute left-[3.5%] top-[2%] h-[26%] w-px bg-dourado/50" />
+        <div className="pointer-events-none absolute bottom-[3%] right-[3.5%] h-[22%] w-px bg-dourado/50" />
+
+        <div className="relative z-10 flex flex-col items-center">
+          <MonogramaIR className="h-9 w-12 md:h-12 md:w-16" />
+          <div className="mt-4 h-px w-16 bg-dourado/50 md:w-20" />
         </div>
 
-        {mensagemEnviada && (
-          <p className="mt-5 text-center text-xs italic text-dourado md:text-sm">
-            Mensagem enviada. Muito obrigado pelo carinho! ♥
+        <div className="relative z-10 my-auto flex w-full items-start justify-center px-4 md:px-8">
+          {unidades.map((u, i) => (
+            <React.Fragment key={u.label}>
+              <div className="flex flex-col items-center">
+                <div className="flex h-[4.5rem] w-14 items-center justify-center rounded-lg border border-dourado/20 bg-[#EDE3D6] shadow-[0_2px_6px_rgba(120,90,50,0.15)] md:h-32 md:w-28">
+                  <span className="text-[2rem] font-light leading-none text-dourado md:text-7xl">
+                    {String(u.valor).padStart(2, '0')}
+                  </span>
+                </div>
+                <span className="mt-3 font-apoio text-[6.5px] tracking-[0.2em] text-vinho/70 md:text-xs md:tracking-[0.3em]">
+                  {u.label}
+                </span>
+              </div>
+
+              {i < unidades.length - 1 && (
+                <div className="flex h-[4.5rem] w-4 items-center justify-center md:h-32 md:w-10">
+                  <span className="h-1 w-1 rounded-full bg-dourado md:h-1.5 md:w-1.5" />
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="h-[3.5rem]" aria-hidden="true" />
+      </section>
+
+      {/* LISTA DE PRESENTES */}
+      <section
+        id="presentes"
+        className="relative overflow-hidden bg-[#E9DFD3] px-6 py-20 md:py-28"
+      >
+        <div className="mx-auto flex max-w-md flex-col items-center text-center md:max-w-2xl">
+          <MonogramaIR className="mb-10 h-9 w-12 md:h-12 md:w-16" />
+
+          <h2 className="text-3xl font-light leading-snug tracking-[0.25em] text-dourado md:text-5xl">
+            LISTA DE<br />PRESENTES
+          </h2>
+
+          <div className="my-8 h-px w-16 bg-dourado/50" />
+
+          <p className="mb-6 text-[15px] italic leading-relaxed tracking-wide text-vinho/80 md:text-xl">
+            A presença de vocês no nosso casamento
+            <br />
+            já é, para nós, o maior presente.
           </p>
-        )}
-      </form>
 
-      {/* Lírio no canto do livro */}
-      <img
-        src={ilustracaoLirio}
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-6 -right-3 z-20 w-16 mix-blend-darken md:-bottom-10 md:-right-6 md:w-28"
-      />
-    </div>
+          <p className="mb-10 text-[15px] italic leading-relaxed tracking-wide text-vinho/80 md:text-xl">
+            Mas, para quem desejar nos presentear,
+            <br />
+            preparamos uma lista com carinho para
+            <br />
+            a nossa nova casa e para os próximos
+            <br />
+            capítulos da nossa história.
+          </p>
 
-    {/* FECHAMENTO */}
-    <div className="mt-14 flex w-full items-center justify-center gap-3">
-      <div className="h-px w-16 bg-dourado/40 md:w-28" />
-      <span className="text-xs text-dourado" aria-hidden="true">✦</span>
-      <div className="h-px w-16 bg-dourado/40 md:w-28" />
-    </div>
+          <Link
+            to="/presentes"
+            className="flex w-full items-center justify-center gap-3 border border-dourado/70 px-4 py-4 font-apoio text-[9px] tracking-[0.2em] text-dourado transition hover:bg-dourado/10 md:w-auto md:px-10 md:text-xs"
+          >
+            ACESSAR NOSSA LISTA DE PRESENTES
+            <span aria-hidden="true">→</span>
+          </Link>
 
-    <p className="mt-6 text-[13px] italic leading-relaxed text-vinho/80 md:text-base">
-      Sua mensagem fará parte das nossas
-      <br />
-      lembranças para sempre.
-    </p>
+          <img
+            src={ilustracaoCalla}
+            alt=""
+            aria-hidden="true"
+            className="mt-12 h-16 w-auto object-contain mix-blend-darken md:h-20"
+          />
 
-    <p className="mt-8 font-apoio text-[11px] tracking-[0.3em] text-vinho/80 md:text-sm">
-      ISABELLA &amp; RAFAEL
-    </p>
-    <p className="mt-2 font-apoio text-[9px] tracking-[0.3em] text-vinho/60 md:text-xs">
-      17.01.2027
-    </p>
-  </div>
-</section>
+          <p className="mt-6 text-sm italic text-vinho/80 md:text-base">Com carinho,</p>
+          <p className="mt-2 font-apoio text-[11px] tracking-[0.3em] text-dourado md:text-sm">
+            ISABELLA &amp; RAFAEL
+          </p>
+        </div>
+      </section>
 
-{/* FOOTER */}
-<footer className="border-t border-dourado/20 bg-[#E3D8C8] px-6 py-6">
-  <div className="mx-auto flex max-w-md flex-col items-center gap-2 text-center md:max-w-3xl md:flex-row md:justify-between">
-    <p className="font-apoio text-[9px] tracking-[0.2em] text-vinho/70 md:text-[11px]">
-      DESENVOLVIDO POR RYAN VICENTE DE OLIVEIRA
-    </p>
-    <a
-      href="https://www.linkedin.com/in/ryan-vicente-de-oliveira-83422725a"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="LinkedIn de Ryan Vicente de Oliveira"
-      className="text-vinho/70 transition hover:text-dourado"
-    >
-      <LinkedinIcon className="h-5 w-5" />
-    </a>
-  </div>
-</footer>
+      {/* MENSAGENS */}
+      <section
+        id="mensagens"
+        className="relative overflow-hidden bg-[#EFE7DC] px-6 py-20 md:py-28"
+      >
+        <div className="mx-auto flex max-w-md flex-col items-center text-center md:max-w-3xl">
+          <MonogramaIR className="mb-10 h-9 w-12 md:h-12 md:w-16" />
 
+          <h2 className="text-3xl font-light leading-snug tracking-[0.2em] text-dourado md:text-5xl">
+            UMA MENSAGEM<br />PARA NÓS
+          </h2>
+
+          <div className="my-8 h-px w-16 bg-dourado/50" />
+
+          <p className="mb-5 text-[15px] italic tracking-wide text-vinho/80 md:text-xl">
+            Deixe um pedacinho de carinho para nós.
+          </p>
+          <p className="mb-12 text-[13px] leading-relaxed tracking-wide text-vinho/80 md:text-base">
+            Suas palavras serão muito especiais e
+            <br />
+            farão parte das nossas lembranças para sempre.
+          </p>
+
+          {/* LIVRO / CARTÃO */}
+          <div className="relative w-full">
+            <div className="absolute -left-1 top-0 z-10 h-full w-3 rounded-l-md bg-gradient-to-r from-[#E3D8C8] via-[#F3ECE0] to-[#E3D8C8] shadow-md md:w-4" />
+
+            <form
+              onSubmit={handleSubmitMensagem}
+              className="relative ml-2 rounded-r-md border border-dourado/20 bg-[#F3ECE0] px-6 pb-12 pt-8 text-left shadow-[0_6px_18px_rgba(120,90,50,0.15)] md:ml-3 md:px-14 md:pb-16 md:pt-12"
+            >
+              {/* campo-armadilha para robôs */}
+              <input
+                type="text"
+                name="site"
+                value={mensagem.site}
+                onChange={(e) => setMensagem({ ...mensagem, site: e.target.value })}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute left-[-9999px] h-0 w-0 opacity-0"
+              />
+
+              <label className="block font-apoio text-[8px] tracking-[0.3em] text-vinho/70 md:text-[10px]">
+                SEU NOME
+              </label>
+              <input
+                type="text"
+                value={mensagem.nome}
+                maxLength={60}
+                onChange={(e) => setMensagem({ ...mensagem, nome: e.target.value })}
+                className="mb-8 mt-2 w-full border-b border-dourado/50 bg-transparent pb-2 text-sm text-vinho focus:border-dourado focus:outline-none md:text-base"
+              />
+
+              <label className="block font-apoio text-[8px] tracking-[0.3em] text-vinho/70 md:text-[10px]">
+                SUA MENSAGEM PARA NÓS
+              </label>
+              <textarea
+                rows={4}
+                value={mensagem.texto}
+                maxLength={500}
+                onChange={(e) => setMensagem({ ...mensagem, texto: e.target.value })}
+                className="mt-1 w-full resize-none bg-transparent text-sm text-vinho focus:outline-none md:text-base"
+                style={{
+                  lineHeight: '2rem',
+                  backgroundAttachment: 'local',
+                  backgroundImage:
+                    'repeating-linear-gradient(transparent, transparent calc(2rem - 1px), rgba(164,130,85,0.5) calc(2rem - 1px), rgba(164,130,85,0.5) 2rem)',
+                }}
+              />
+
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="submit"
+                  disabled={enviandoMensagem}
+                  className="flex items-center gap-3 border border-dourado/70 px-6 py-3 font-apoio text-[8px] tracking-[0.25em] text-dourado transition hover:bg-dourado/10 disabled:opacity-60 md:px-10 md:py-4 md:text-[11px]"
+                >
+                  {enviandoMensagem ? 'ENVIANDO...' : 'ENVIAR MENSAGEM'}
+                  <span aria-hidden="true">→</span>
+                </button>
+              </div>
+
+              {erroMensagem && (
+                <p className="mt-5 text-center text-xs text-red-800 md:text-sm">{erroMensagem}</p>
+              )}
+              {mensagemEnviada && (
+                <p className="mt-5 text-center text-xs italic text-dourado md:text-sm">
+                  Mensagem enviada. Muito obrigado pelo carinho! ♥
+                </p>
+              )}
+            </form>
+
+            {/* Lírio no canto do livro */}
+            <img
+              src={ilustracaoLirio}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-6 -right-3 z-20 w-16 mix-blend-darken md:-bottom-10 md:-right-6 md:w-28"
+            />
+          </div>
+
+          {/* ÚLTIMAS MENSAGENS */}
+          {listaMensagens.length > 0 && (
+            <div className="mt-14 w-full">
+              <p className="mb-5 font-apoio text-[9px] tracking-[0.3em] text-vinho/70 md:text-xs">
+                ÚLTIMAS MENSAGENS
+              </p>
+
+              <div className="flex flex-col gap-3">
+                {listaMensagens.slice(0, 3).map((m, i) => (
+                  <article
+                    key={`${m.data}-${i}`}
+                    className="border border-dourado/30 bg-[#F3ECE0] px-5 py-4 text-left"
+                  >
+                    <p className="whitespace-pre-line break-words text-[13px] italic leading-relaxed text-vinho/90 md:text-base">
+                      “{m.texto}”
+                    </p>
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <p className="font-apoio text-[9px] tracking-[0.2em] text-dourado md:text-[11px]">
+                        {m.nome.toUpperCase()}
+                      </p>
+                      <p className="text-[10px] text-vinho/50">{formatarData(m.data)}</p>
+                    </div>
+                    {m.item && (
+                      <p className="mt-1 text-[10px] italic text-vinho/60">Presenteou com: {m.item}</p>
+                    )}
+                  </article>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setModalMensagens(true)}
+                className="mt-6 border border-dourado/70 px-6 py-3 font-apoio text-[8px] tracking-[0.25em] text-dourado transition hover:bg-dourado/10 md:px-10 md:text-[11px]"
+              >
+                VER MENSAGENS ({listaMensagens.length})
+              </button>
+            </div>
+          )}
+
+          {/* FECHAMENTO */}
+          <div className="mt-14 flex w-full items-center justify-center gap-3">
+            <div className="h-px w-16 bg-dourado/40 md:w-28" />
+            <span className="text-xs text-dourado" aria-hidden="true">✦</span>
+            <div className="h-px w-16 bg-dourado/40 md:w-28" />
+          </div>
+
+          <p className="mt-6 text-[13px] italic leading-relaxed text-vinho/80 md:text-base">
+            Sua mensagem fará parte das nossas
+            <br />
+            lembranças para sempre.
+          </p>
+
+          <p className="mt-8 font-apoio text-[11px] tracking-[0.3em] text-vinho/80 md:text-sm">
+            ISABELLA &amp; RAFAEL
+          </p>
+          <p className="mt-2 font-apoio text-[9px] tracking-[0.3em] text-vinho/60 md:text-xs">
+            17.01.2027
+          </p>
+        </div>
+      </section>
+
+      {/* MODAL: TODAS AS MENSAGENS */}
+      {modalMensagens && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-vinho/30 p-4 backdrop-blur-sm"
+          onClick={() => setModalMensagens(false)}
+        >
+          <div
+            className="relative flex max-h-[85vh] w-full max-w-lg flex-col border border-dourado/30 bg-[#EFE7DC] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative border-b border-dourado/20 px-6 py-5 text-center">
+              <h3 className="font-apoio text-xs tracking-[0.3em] text-dourado">MENSAGENS</h3>
+              <button
+                type="button"
+                onClick={() => setModalMensagens(false)}
+                aria-label="Fechar"
+                className="absolute right-4 top-4 text-xl text-vinho transition hover:text-dourado"
+              >
+                &#10005;
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3 overflow-y-auto p-5">
+              {listaMensagens.map((m, i) => (
+                <article key={`${m.data}-${i}`} className="border border-dourado/20 bg-[#F3ECE0] px-4 py-3">
+                  <p className="whitespace-pre-line break-words text-sm italic leading-relaxed text-vinho/90">
+                    “{m.texto}”
+                  </p>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <p className="font-apoio text-[9px] tracking-[0.2em] text-dourado">
+                      {m.nome.toUpperCase()}
+                    </p>
+                    <p className="text-[10px] text-vinho/50">{formatarData(m.data)}</p>
+                  </div>
+                  {m.item && (
+                    <p className="mt-1 text-[10px] italic text-vinho/60">Presenteou com: {m.item}</p>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FOOTER */}
+      <footer className="border-t border-dourado/20 bg-[#E3D8C8] px-6 py-6">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-2 text-center md:max-w-3xl md:flex-row md:justify-between">
+          <p className="font-apoio text-[9px] tracking-[0.2em] text-vinho/70 md:text-[11px]">
+            DESENVOLVIDO POR RYAN VICENTE DE OLIVEIRA
+          </p>
+          <a
+            href="https://www.linkedin.com/in/ryan-vicente-de-oliveira-83422725a"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn de Ryan Vicente de Oliveira"
+            className="text-vinho/70 transition hover:text-dourado"
+          >
+            <LinkedinIcon className="h-5 w-5" />
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -35,3 +35,33 @@ export async function itemJaPago(categoria, item) {
   const dados = await r.json();
   return dados.length > 0;
 }
+
+const tabela = (nome) => `${process.env.SUPABASE_URL}/rest/v1/${nome}`;
+
+export async function salvarMensagem({ nome, texto }) {
+  const r = await fetch(tabela('mensagens'), {
+    method: 'POST',
+    headers: { ...headers(), Prefer: 'return=minimal' },
+    body: JSON.stringify({ nome, texto }),
+  });
+  if (!r.ok) throw new Error(`Supabase: ${await r.text()}`);
+}
+
+export async function listarMensagens() {
+  const r = await fetch(
+    `${tabela('mensagens')}?select=nome,texto,criado_em&visivel=eq.true&order=criado_em.desc&limit=100`,
+    { headers: headers() }
+  );
+  if (!r.ok) throw new Error(`Supabase: ${await r.text()}`);
+  return r.json();
+}
+
+export async function listarRecadosPresentes() {
+  const r = await fetch(
+    `${tabela('presentes_pagos')}?select=convidado,mensagem,item,criado_em` +
+      `&status=eq.approved&oculta=eq.false&mensagem=not.is.null&order=criado_em.desc&limit=100`,
+    { headers: headers() }
+  );
+  if (!r.ok) throw new Error(`Supabase: ${await r.text()}`);
+  return r.json();
+}

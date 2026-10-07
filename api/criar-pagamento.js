@@ -7,17 +7,40 @@ export default async function handler(req, res) {
   }
 
   const { slug, nome, convidado, mensagem } = req.body || {};
-  const chave = `${slug}|${String(nome || '').normalize('NFC')}`;
+  const nomeNormalizado = String(nome || '').normalize('NFC');
+  const chave = `${slug}|${nomeNormalizado}`;
   const preco = catalogo[chave];
 
   if (!preco || !convidado?.trim()) {
     return res.status(400).json({ erro: 'Dados inválidos' });
   }
-  if (!CATEGORIAS_MULTIPLAS.includes(slug) && (await itemJaPago(slug, String(nome).normalize('NFC')))) {
-  return res.status(409).json({ erro: 'Este presente já foi escolhido' });
-}
+
+  // Bloqueia item já presenteado (se o Supabase falhar, não derruba o pagamento)
+  try {
+    if (
+      !CATEGORIAS_MULTIPLAS.includes(slug) &&
+      (await itemJaPago(slug, nomeNormalizado))
+    ) {
+      return res.status(409).json({ erro: 'Este presente já foi escolhido' });
+    }
+  } catch (e) {
+    console.error('Falha ao checar item no Supabase:', e);
+  }
 
   const site = (process.env.SITE_URL || `https://${req.headers.host}`).replace(/\/$/, '');
+
+  // Dados do presente dentro do external_reference (limite de 256 caracteres)
+  const ref = {
+    c: slug,
+    i: nomeNormalizado,
+    v: convidado.trim().slice(0, 40),
+    m: (mensagem || '').slice(0, 50),
+  };
+  let externalRef = Buffer.from(JSON.stringify(ref)).toString('base64url');
+  if (externalRef.length > 256) {
+    ref.m = '';
+    externalRef = Buffer.from(JSON.stringify(ref)).toString('base64url');
+  }
 
   const preferencia = {
     items: [
@@ -34,24 +57,21 @@ export default async function handler(req, res) {
       pending: `${site}/presentes/obrigado`,
       failure: `${site}/presentes/${slug}`,
     },
-    external_reference: `${slug}-${Date.now()}`,
+    external_reference: externalRef,
     statement_descriptor: 'ISABELLA RAFAEL',
     metadata: {
       convidado: convidado.trim().slice(0, 80),
       mensagem: (mensagem || '').slice(0, 300),
-      item: nome,
+      item: nomeNormalizado,
       categoria: slug,
     },
   };
 
-  // auto_return só aceita URLs https (em localhost, o convidado volta pelo botão do Mercado Pago)
-  if (site.startsWith('https://')) preferencia.auto_return = 'approved';
-
-  // logo depois do bloco que define auto_return:
-if (site.startsWith('https://')) {
-  preferencia.auto_return = 'approved';
-  preferencia.notification_url = `${site}/api/webhook-mp`;
-}
+  // auto_return e notification_url só funcionam com https (em localhost não)
+  if (site.startsWith('https://')) {
+    preferencia.auto_return = 'approved';
+    preferencia.notification_url = `${site}/api/webhook-mp`;
+  }
 
   try {
     const resposta = await fetch('https://api.mercadopago.com/checkout/preferences', {

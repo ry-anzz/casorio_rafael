@@ -15,20 +15,38 @@ export default async function handler(req, res) {
     if (!r.ok) return res.status(500).end(); // o Mercado Pago tenta de novo
 
     const pg = await r.json();
-    const meta = pg.metadata || {};
-    if (!meta.categoria || !meta.item) return res.status(200).end();
+console.log('Webhook recebido:', pg.id, pg.status, pg.external_reference);
 
-    await salvarPagamento({
-      payment_id: String(pg.id),
-      categoria: meta.categoria,
-      item: String(meta.item).normalize('NFC'),
-      convidado: meta.convidado || null,
-      mensagem: meta.mensagem || null,
-      valor: pg.transaction_amount,
-      status: pg.status, // approved, pending, rejected, refunded...
-    });
-
+let dados = null;
+const meta = pg.metadata || {};
+if (meta.categoria && meta.item) {
+  dados = {
+    categoria: meta.categoria,
+    item: meta.item,
+    convidado: meta.convidado,
+    mensagem: meta.mensagem,
+  };
+} else {
+  try {
+    const d = JSON.parse(Buffer.from(pg.external_reference, 'base64url').toString('utf8'));
+    dados = { categoria: d.c, item: d.i, convidado: d.v, mensagem: d.m };
+  } catch {
+    console.warn('Pagamento sem dados do presente:', pg.id);
     return res.status(200).end();
+  }
+}
+
+await salvarPagamento({
+  payment_id: String(pg.id),
+  categoria: dados.categoria,
+  item: String(dados.item).normalize('NFC'),
+  convidado: dados.convidado || null,
+  mensagem: dados.mensagem || null,
+  valor: pg.transaction_amount,
+  status: pg.status,
+});
+
+return res.status(200).end();
   } catch (e) {
     console.error(e);
     return res.status(500).end();

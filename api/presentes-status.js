@@ -1,5 +1,5 @@
 import { itensPagos, CATEGORIAS_MULTIPLAS } from './_supabase.js';
-
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
 export default async function handler(req, res) {
   try {
     const linhas = await itensPagos();

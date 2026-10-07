@@ -73,7 +73,7 @@ const informacoes = [
   {
     icone: ClockIcon,
     titulo: 'HORÁRIO DE CHEGADA',
-    texto: 'Recomendamos que os convidados cheguem com pelo menos 30 minutos de antecedência para aproveitar o momento da cerimônia.',
+    texto: 'Recomendamos que os convidados se organizem para chegar no horário para aproveitar o momento da cerimônia.',
   },
   {
     icone: CarIcon,
@@ -88,7 +88,7 @@ const informacoes = [
   {
     icone: LeafIcon,
     titulo: 'OUTRAS ORIENTAÇÕES',
-    texto: 'O evento será realizado ao ar livre, em um ambiente rodeado pela natureza. Recomendamos roupas confortáveis e, se possível, levar um casaquinho para a noite.',
+    texto: 'O evento será realizado em um espaço cercado pela natureza. Recomendamos o traje esporte fino, combinando conforto e elegância para o nosso grande dia.',
   },
 ];
 

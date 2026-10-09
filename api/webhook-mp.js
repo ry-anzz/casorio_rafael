@@ -44,6 +44,7 @@ await salvarPagamento({
   mensagem: dados.mensagem || null,
   valor: pg.transaction_amount,
   status: pg.status,
+  status_detail: pg.status_detail || null,
 });
 
 return res.status(200).end();

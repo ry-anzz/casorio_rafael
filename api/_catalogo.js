@@ -21,7 +21,7 @@ export default {
   "cozinha|Mixer": 250,
   "cozinha|Panela de pressão": 250,
   "cozinha|Potes herméticos": 250,
-  "cozinha|teste": 1,
+  "cozinha|teste": 5,
   "experiencias|Alimentação durante a viagem": 800,
   "experiencias|Cota livre para a lua de mel": 300,
   "experiencias|Cota livre para uma experiência": 300,

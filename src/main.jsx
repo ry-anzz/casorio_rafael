@@ -5,11 +5,13 @@ import App from './App';
 import PaginaPresentes from './PaginaPresentes';
 import PaginaObrigado from './PaginaObrigado';
 import PaginaCategoria from './PaginaCategoria';
+import MusicaFundo from './components/MusicaFundo';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
+      <MusicaFundo />
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/presentes" element={<PaginaPresentes />} />

@@ -120,30 +120,89 @@ const formatarData = (iso) =>
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // RSVP
+    // RSVP
+  const [busca, setBusca] = useState('');
+  const [resultados, setResultados] = useState([]);
+  const [buscou, setBuscou] = useState(false);
+  const [convidado, setConvidado] = useState(null);
   const [rsvp, setRsvp] = useState({
     presenca: 'sim',
-    acompanhantes: ['Isabella'],
-    outroAcompanhante: '',
+    vaiConvidado: true,
+    vaiAcompanhante: true,
     restricao: '',
   });
   const [enviado, setEnviado] = useState(false);
+  const [enviandoRsvp, setEnviandoRsvp] = useState(false);
+  const [erroRsvp, setErroRsvp] = useState('');
 
-  const toggleAcompanhante = (nome) => {
-    setRsvp((prev) => ({
-      ...prev,
-      acompanhantes: prev.acompanhantes.includes(nome)
-        ? prev.acompanhantes.filter((n) => n !== nome)
-        : [...prev.acompanhantes, nome],
-    }));
+  const selecionarConvidado = (c) => {
+    setConvidado(c);
+    setEnviado(false);
+    setErroRsvp('');
+    setRsvp({
+      presenca: c.status === 'nao' ? 'nao' : 'sim',
+      vaiConvidado: c.vai_convidado ?? true,
+      vaiAcompanhante: c.vai_acompanhante ?? true,
+      restricao: '',
+    });
   };
 
-  const handleSubmitRsvp = (e) => {
+  // link personalizado ?c=TOKEN
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get('c');
+    if (!c) return;
+    fetch(`/api/convidados?c=${encodeURIComponent(c)}`)
+      .then((r) => r.json())
+      .then((d) => d.convidados?.[0] && selecionarConvidado(d.convidados[0]))
+      .catch(() => {});
+  }, []);
+
+  // busca por nome com debounce
+  useEffect(() => {
+    if (busca.trim().length < 3) {
+      setResultados([]);
+      setBuscou(false);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetch(`/api/convidados?q=${encodeURIComponent(busca)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          setResultados(d.convidados || []);
+          setBuscou(true);
+        })
+        .catch(() => {});
+    }, 300);
+    return () => clearTimeout(t);
+  }, [busca]);
+
+  const handleSubmitRsvp = async (e) => {
     e.preventDefault();
-    console.log('RSVP:', rsvp);
-    // Integração com Supabase/API aqui
-    setEnviado(true);
+    if (!convidado) return;
+    setErroRsvp('');
+    setEnviandoRsvp(true);
+    try {
+      const r = await fetch('/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: convidado.id, ...rsvp }),
+      });
+      if (!r.ok) throw new Error();
+      setEnviado(true);
+    } catch {
+      setErroRsvp('Não foi possível confirmar. Tente novamente.');
+    } finally {
+      setEnviandoRsvp(false);
+    }
   };
+
+  const primeiroNome = convidado ? convidado.nome.split(' ')[0] : '';
+  const pessoas = convidado
+    ? [
+        { chave: 'vaiConvidado', nome: convidado.nome },
+        ...(convidado.acompanhante ? [{ chave: 'vaiAcompanhante', nome: convidado.acompanhante }] : []),
+      ]
+    : [];
 
   // Mensagens
   const [mensagem, setMensagem] = useState({ nome: '', texto: '', site: '' });
@@ -501,141 +560,182 @@ function App() {
           </div>
 
           {/* SAUDAÇÃO E FORMULÁRIO */}
-          <div className="flex w-full flex-col">
-
-            <div className="mb-8 w-full text-center">
-              <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
-                Isabella e Rafael,
-              </h3>
-              <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
-                queremos muito celebrar este dia ao seu lado.
+                    {/* BUSCA DO CONVIDADO */}
+          {!convidado && (
+            <div className="w-full text-left">
+              <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">Encontre o seu convite</p>
+              <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
+                Digite seu nome para confirmar a presença.
               </p>
 
-              <div className="flex flex-col items-center gap-2 font-apoio text-[9px] tracking-[0.25em] text-vinho/80 md:text-[11px]">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-3.5 w-3.5 text-dourado" />
-                  <span>17 DE JANEIRO DE 2027 &nbsp;·&nbsp; 16H</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <PinIcon className="h-3.5 w-3.5 text-dourado" />
-                  <span>SERRA DOS CRISTAIS</span>
-                </div>
-              </div>
-            </div>
+              <input
+                type="text"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Seu nome"
+                className="w-full rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-3 text-[12px] text-vinho placeholder:text-vinho/40 focus:border-dourado/60 focus:outline-none md:text-sm"
+              />
 
-            <form id="form-rsvp" onSubmit={handleSubmitRsvp} className="w-full space-y-6 pb-6">
+              {resultados.length > 0 && (
+                <div className="mt-2 flex flex-col gap-2">
+                  {resultados.map((c) => (
+                    <button
+                      type="button"
+                      key={c.id}
+                      onClick={() => selecionarConvidado(c)}
+                      className="rounded-md border border-dourado/30 bg-[#E8DCC8] px-3 py-3 text-left text-[12px] text-vinho transition hover:border-dourado/60 md:text-sm"
+                    >
+                      {c.nome}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-              {/* Você estará conosco? */}
-              <div className="w-full text-left">
-                <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
-                  Você estará conosco?
+              {buscou && resultados.length === 0 && (
+                <p className="mt-3 text-[11px] italic text-vinho/70">
+                  Não encontramos esse nome. Tente digitar de outra forma ou fale com os noivos.
                 </p>
-                <div className="flex w-full flex-col gap-2.5 md:flex-row">
-                  {[
-                    { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
-                    { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
-                  ].map((op) => {
-                    const ativo = rsvp.presenca === op.valor;
-                    return (
-                      <button
-                        type="button"
-                        key={op.valor}
-                        onClick={() => setRsvp({ ...rsvp, presenca: op.valor })}
-                        className={`flex w-full flex-1 items-center justify-start gap-3 rounded-md border px-3 py-3 font-apoio text-[9px] tracking-[0.1em] transition md:text-[10px] ${
-                          ativo
-                            ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
-                            : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
-                        }`}
-                      >
-                        <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors ${ativo ? 'border-dourado' : 'border-dourado/40'}`}>
-                          {ativo && <div className="h-1.5 w-1.5 rounded-full bg-[#A48255]" />}
-                        </div>
-                        {op.label}
-                      </button>
-                    );
-                  })}
+              )}
+            </div>
+          )}
+
+          {/* SAUDAÇÃO E FORMULÁRIO */}
+          {convidado && !enviado && (
+            <div className="flex w-full flex-col">
+              <div className="mb-8 w-full text-center">
+                <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
+                  {primeiroNome},
+                </h3>
+                <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
+                  queremos muito celebrar este dia ao seu lado.
+                </p>
+
+                <div className="flex flex-col items-center gap-2 font-apoio text-[9px] tracking-[0.25em] text-vinho/80 md:text-[11px]">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-3.5 w-3.5 text-dourado" />
+                    <span>17 DE JANEIRO DE 2027 &nbsp;·&nbsp; 16H</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PinIcon className="h-3.5 w-3.5 text-dourado" />
+                    <span>SERRA DOS CRISTAIS</span>
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => { setConvidado(null); setBusca(''); }}
+                  className="mt-5 text-[10px] italic text-vinho/60 underline"
+                >
+                  Não sou {primeiroNome}
+                </button>
               </div>
 
-              {/* Quem estará conosco? */}
-              {rsvp.presenca === 'sim' && (
+              <form id="form-rsvp" onSubmit={handleSubmitRsvp} className="w-full space-y-6 pb-6">
                 <div className="w-full text-left">
-                  <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">
-                    Quem estará conosco?
-                  </p>
-                  <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
-                    Selecione os nomes dos acompanhantes (se houver).
-                  </p>
-                  <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
-                    {['Isabella', 'Rafael'].map((nome) => {
-                      const ativo = rsvp.acompanhantes.includes(nome);
+                  <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">Você estará conosco?</p>
+                  <div className="flex w-full flex-col gap-2.5 md:flex-row">
+                    {[
+                      { valor: 'sim', label: 'SIM, ESTAREI PRESENTE' },
+                      { valor: 'nao', label: 'NÃO PODEREI COMPARECER' },
+                    ].map((op) => {
+                      const ativo = rsvp.presenca === op.valor;
                       return (
                         <button
                           type="button"
-                          key={nome}
-                          onClick={() => toggleAcompanhante(nome)}
-                          className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
+                          key={op.valor}
+                          onClick={() => setRsvp({ ...rsvp, presenca: op.valor })}
+                          className={`flex w-full flex-1 items-center justify-start gap-3 rounded-md border px-3 py-3 font-apoio text-[9px] tracking-[0.1em] transition md:text-[10px] ${
                             ativo
                               ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
                               : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
                           }`}
                         >
-                          <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
-                            ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
-                          }`}>
-                            <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
+                          <div className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors ${ativo ? 'border-dourado' : 'border-dourado/40'}`}>
+                            {ativo && <div className="h-1.5 w-1.5 rounded-full bg-[#A48255]" />}
                           </div>
-                          {nome}
+                          {op.label}
                         </button>
                       );
                     })}
-
-                    {/* Acompanhante extra */}
-                    <div className="flex w-full items-center gap-2 rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] transition-colors focus-within:border-dourado/60 md:w-auto md:flex-1 md:text-xs">
-                      <div className="h-3 w-3 shrink-0 rounded-[2px] border border-dourado/40 bg-transparent" />
-                      <input
-                        type="text"
-                        value={rsvp.outroAcompanhante}
-                        onChange={(e) => setRsvp({ ...rsvp, outroAcompanhante: e.target.value })}
-                        placeholder="Nome do acompanhante"
-                        className="w-full bg-transparent text-vinho placeholder:text-vinho/40 focus:outline-none"
-                      />
-                    </div>
                   </div>
                 </div>
-              )}
-            </form>
-          </div>
 
-          {/* RAMO, FRASE FINAL E BOTÃO */}
-          <div className="relative z-20 mt-8 flex w-full flex-col items-center justify-center">
-            <div className="mb-6 flex items-center justify-center gap-3 bg-[#E9DFD3]">
-              <img
-                src={ilustracaoRamo}
-                alt="Ramo dourado decorativo"
-                className="h-5 w-auto object-contain mix-blend-darken md:h-6"
-              />
-              <p className="text-[14px] italic leading-tight text-dourado md:text-base">
-                Será uma alegria ter você conosco.
-              </p>
+                {rsvp.presenca === 'sim' && pessoas.length > 1 && (
+                  <div className="w-full text-left">
+                    <p className="mb-1 text-[11px] font-bold text-vinho md:text-xs">Quem estará conosco?</p>
+                    <p className="mb-3 text-[10px] text-vinho/70 md:text-[11px]">
+                      Marque quem irá ao casamento.
+                    </p>
+                    <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
+                      {pessoas.map((p) => {
+                        const ativo = rsvp[p.chave];
+                        return (
+                          <button
+                            type="button"
+                            key={p.chave}
+                            onClick={() => setRsvp({ ...rsvp, [p.chave]: !rsvp[p.chave] })}
+                            className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
+                              ativo
+                                ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+                                : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+                            }`}
+                          >
+                            <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
+                              ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
+                            }`}>
+                              <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            {p.nome}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {rsvp.presenca === 'sim' && (
+                  <div className="w-full text-left">
+                    <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
+                      Alguma restrição alimentar? (opcional)
+                    </p>
+                    <input
+                      type="text"
+                      value={rsvp.restricao}
+                      maxLength={300}
+                      onChange={(e) => setRsvp({ ...rsvp, restricao: e.target.value })}
+                      className="w-full rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] text-vinho focus:border-dourado/60 focus:outline-none md:text-xs"
+                    />
+                  </div>
+                )}
+              </form>
+
+              <div className="relative z-20 mt-8 flex w-full flex-col items-center justify-center">
+                <div className="mb-6 flex items-center justify-center gap-3 bg-[#E9DFD3]">
+                  <img src={ilustracaoRamo} alt="Ramo dourado decorativo" className="h-5 w-auto object-contain mix-blend-darken md:h-6" />
+                  <p className="text-[14px] italic leading-tight text-dourado md:text-base">
+                    Será uma alegria ter você conosco.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  form="form-rsvp"
+                  disabled={enviandoRsvp}
+                  className="rounded-md bg-[#A48255] px-8 py-3.5 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] shadow-sm transition hover:bg-[#8c6b41] disabled:opacity-60 md:text-[10px]"
+                >
+                  {enviandoRsvp ? 'ENVIANDO...' : 'CONFIRMAR PRESENÇA →'}
+                </button>
+
+                {erroRsvp && <p className="mt-4 text-center text-xs text-red-800">{erroRsvp}</p>}
+              </div>
             </div>
-
-            <button
-              type="submit"
-              form="form-rsvp"
-              className="rounded-md bg-[#A48255] px-8 py-3.5 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] shadow-sm transition hover:bg-[#8c6b41] md:text-[10px]"
-            >
-              CONFIRMAR PRESENÇA &nbsp;→
-            </button>
-          </div>
+          )}
 
           {/* CAIXA DE CONFIRMAÇÃO */}
-          {enviado && (
-            <div className="relative mx-auto mt-16 w-full md:w-[85%]">
-              <div className="mb-8 h-[1px] w-full bg-dourado/30" />
-
+          {convidado && enviado && (
+            <div className="relative mx-auto mt-6 w-full md:w-[85%]">
               <div className="relative mx-auto w-full rounded-md border border-dourado/30 bg-transparent px-4 pb-6 pt-8 text-center">
                 <div className="absolute -top-3.5 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-dourado/50 bg-[#E9DFD3] text-[#A48255]">
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -643,14 +743,23 @@ function App() {
                   </svg>
                 </div>
                 <p className="mb-2 font-apoio text-[10px] tracking-[0.2em] text-vinho md:text-[12px]">
-                  PRESENÇA CONFIRMADA!
+                  {rsvp.presenca === 'sim' ? 'PRESENÇA CONFIRMADA!' : 'RESPOSTA REGISTRADA'}
                 </p>
                 <p className="mb-1.5 text-[10px] text-vinho/80 md:text-xs">
-                  Estamos muito felizes em compartilhar esse momento com você.
+                  {rsvp.presenca === 'sim'
+                    ? 'Estamos muito felizes em compartilhar esse momento com você.'
+                    : 'Sentiremos a sua falta, obrigado por avisar.'}
                 </p>
-                <p className="text-[10px] italic text-vinho/80 md:text-xs">
-                  Nos vemos em 17 de janeiro. ♥
-                </p>
+                {rsvp.presenca === 'sim' && (
+                  <p className="text-[10px] italic text-vinho/80 md:text-xs">Nos vemos em 17 de janeiro. ♥</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setEnviado(false)}
+                  className="mt-4 text-[10px] italic text-vinho/60 underline"
+                >
+                  Alterar minha resposta
+                </button>
               </div>
             </div>
           )}

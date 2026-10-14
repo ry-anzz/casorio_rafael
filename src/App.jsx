@@ -695,7 +695,7 @@ function App() {
                   </div>
                 )}
 
-                {rsvp.presenca === 'sim' && (
+                {/* {rsvp.presenca === 'sim' && (
                   <div className="w-full text-left">
                     <p className="mb-2 text-[11px] font-bold text-vinho md:text-xs">
                       Alguma restrição alimentar? (opcional)
@@ -708,7 +708,7 @@ function App() {
                       className="w-full rounded-md border border-dourado/30 bg-[#E9DFD3]/60 px-3 py-2.5 text-[11px] text-vinho focus:border-dourado/60 focus:outline-none md:text-xs"
                     />
                   </div>
-                )}
+                )} */}
               </form>
 
               <div className="relative z-20 mt-8 flex w-full flex-col items-center justify-center">

@@ -6,6 +6,7 @@ import PaginaPresentes from './PaginaPresentes';
 import PaginaObrigado from './PaginaObrigado';
 import PaginaCategoria from './PaginaCategoria';
 import MusicaFundo from './components/MusicaFundo';
+import Admin from './Admin';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/presentes" element={<PaginaPresentes />} />
         <Route path="/presentes/:slug" element={<PaginaCategoria />} />
         <Route path="/presentes/obrigado" element={<PaginaObrigado />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

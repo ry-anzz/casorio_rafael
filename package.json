@@ -8,11 +8,12 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-     "gerar:catalogo": "node scripts/gerar-catalogo.mjs",
-  "predev": "npm run gerar:catalogo",
-  "prebuild": "npm run gerar:catalogo"
+    "gerar:catalogo": "node scripts/gerar-catalogo.mjs",
+    "predev": "npm run gerar:catalogo",
+    "prebuild": "npm run gerar:catalogo"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4"

@@ -142,6 +142,35 @@ function App() {
     });
   };
 
+    // link personalizado ?c=TOKEN
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get('c');
+    if (!c) return;
+    fetch(`/api/convidados?c=${encodeURIComponent(c)}`)
+      .then((r) => r.json())
+      .then((d) => d.convidados?.[0] && selecionarConvidado(d.convidados[0]))
+      .catch(() => {});
+  }, []);
+
+  // busca por nome com debounce
+  useEffect(() => {
+    if (busca.trim().length < 3) {
+      setResultados([]);
+      setBuscou(false);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetch(`/api/convidados?q=${encodeURIComponent(busca)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          setResultados(d.convidados || []);
+          setBuscou(true);
+        })
+        .catch(() => {});
+    }, 300);
+    return () => clearTimeout(t);
+  }, [busca]);
+
   const handleSubmitRsvp = async (e) => {
     e.preventDefault();
     if (!convidado) return;

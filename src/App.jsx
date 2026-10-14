@@ -125,15 +125,11 @@ function App() {
   const [resultados, setResultados] = useState([]);
   const [buscou, setBuscou] = useState(false);
   const [convidado, setConvidado] = useState(null);
-  const [rsvp, setRsvp] = useState({
-    presenca: 'sim',
-    vaiConvidado: true,
-    vaiAcompanhante: true,
-    restricao: '',
-  });
   const [enviado, setEnviado] = useState(false);
   const [enviandoRsvp, setEnviandoRsvp] = useState(false);
   const [erroRsvp, setErroRsvp] = useState('');
+
+    const [rsvp, setRsvp] = useState({ presenca: 'sim', marcados: {}, restricao: '' });
 
   const selecionarConvidado = (c) => {
     setConvidado(c);
@@ -141,40 +137,10 @@ function App() {
     setErroRsvp('');
     setRsvp({
       presenca: c.status === 'nao' ? 'nao' : 'sim',
-      vaiConvidado: c.vai_convidado ?? true,
-      vaiAcompanhante: c.vai_acompanhante ?? true,
-      restricao: '',
+      marcados: Object.fromEntries(c.pessoas.map((p) => [p.id, p.vai ?? true])),
+      restricao: c.restricao || '',
     });
   };
-
-  // link personalizado ?c=TOKEN
-  useEffect(() => {
-    const c = new URLSearchParams(window.location.search).get('c');
-    if (!c) return;
-    fetch(`/api/convidados?c=${encodeURIComponent(c)}`)
-      .then((r) => r.json())
-      .then((d) => d.convidados?.[0] && selecionarConvidado(d.convidados[0]))
-      .catch(() => {});
-  }, []);
-
-  // busca por nome com debounce
-  useEffect(() => {
-    if (busca.trim().length < 3) {
-      setResultados([]);
-      setBuscou(false);
-      return;
-    }
-    const t = setTimeout(() => {
-      fetch(`/api/convidados?q=${encodeURIComponent(busca)}`)
-        .then((r) => r.json())
-        .then((d) => {
-          setResultados(d.convidados || []);
-          setBuscou(true);
-        })
-        .catch(() => {});
-    }, 300);
-    return () => clearTimeout(t);
-  }, [busca]);
 
   const handleSubmitRsvp = async (e) => {
     e.preventDefault();
@@ -185,24 +151,27 @@ function App() {
       const r = await fetch('/api/rsvp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: convidado.id, ...rsvp }),
+        body: JSON.stringify({
+          id: convidado.id,
+          presenca: rsvp.presenca,
+          restricao: rsvp.restricao,
+          pessoas: convidado.pessoas.map((p) => ({ id: p.id, vai: !!rsvp.marcados[p.id] })),
+        }),
       });
       if (!r.ok) throw new Error();
       setEnviado(true);
     } catch {
-      setErroRsvp('Não foi possível confirmar. Tente novamente.');
+      setErroRsvp('Não foi possível confirmar. Marque pelo menos uma pessoa e tente novamente.');
     } finally {
       setEnviandoRsvp(false);
     }
   };
 
-  const primeiroNome = convidado ? convidado.nome.split(' ')[0] : '';
-  const pessoas = convidado
-    ? [
-        { chave: 'vaiConvidado', nome: convidado.nome },
-        ...(convidado.acompanhante ? [{ chave: 'vaiAcompanhante', nome: convidado.acompanhante }] : []),
-      ]
-    : [];
+  const listaNomes = (nomes) =>
+    nomes.length > 1 ? `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}` : nomes[0] || '';
+
+  const saudacao = convidado ? listaNomes(convidado.pessoas.map((p) => p.nome.split(' ')[0])) : '';
+  const pessoas = convidado ? convidado.pessoas.map((p) => ({ chave: p.id, nome: p.nome })) : [];
 
   // Mensagens
   const [mensagem, setMensagem] = useState({ nome: '', texto: '', site: '' });
@@ -585,7 +554,7 @@ function App() {
                       onClick={() => selecionarConvidado(c)}
                       className="rounded-md border border-dourado/30 bg-[#E8DCC8] px-3 py-3 text-left text-[12px] text-vinho transition hover:border-dourado/60 md:text-sm"
                     >
-                      {c.nome}
+                      {c.pessoas.map((p) => p.nome).join(' · ')}
                     </button>
                   ))}
                 </div>
@@ -604,7 +573,7 @@ function App() {
             <div className="flex w-full flex-col">
               <div className="mb-8 w-full text-center">
                 <h3 className="mb-1 text-[24px] italic text-dourado md:text-[32px]">
-                  {primeiroNome},
+                  {saudacao},
                 </h3>
                 <p className="mb-6 text-[11px] text-vinho/80 md:text-[13px]">
                   queremos muito celebrar este dia ao seu lado.
@@ -626,7 +595,7 @@ function App() {
                   onClick={() => { setConvidado(null); setBusca(''); }}
                   className="mt-5 text-[10px] italic text-vinho/60 underline"
                 >
-                  Não sou {primeiroNome}
+                 Não é o seu convite?
                 </button>
               </div>
 
@@ -668,17 +637,12 @@ function App() {
                     </p>
                     <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
                       {pessoas.map((p) => {
-                        const ativo = rsvp[p.chave];
+                        const ativo = !!rsvp.marcados[p.chave];
                         return (
                           <button
                             type="button"
                             key={p.chave}
-                            onClick={() => setRsvp({ ...rsvp, [p.chave]: !rsvp[p.chave] })}
-                            className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
-                              ativo
-                                ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
-                                : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
-                            }`}
+                            onClick={() => setRsvp({ ...rsvp, marcados: { ...rsvp.marcados, [p.chave]: !rsvp.marcados[p.chave] } })}
                           >
                             <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
                               ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'

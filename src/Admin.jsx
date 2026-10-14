@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
+const ordenadas = (c) => [...c.pessoas].sort((a, b) => a.ordem - b.ordem);
 const pessoasConfirmadas = (c) =>
-  c.status !== 'sim' ? 0 : (c.vai_convidado ? 1 : 0) + (c.acompanhante && c.vai_acompanhante ? 1 : 0);
+  c.status === 'sim' ? c.pessoas.filter((p) => p.vai).length : 0;
 
 export default function Admin() {
   const [senha, setSenha] = useState(sessionStorage.getItem('admin_senha') || '');
@@ -34,44 +34,39 @@ export default function Admin() {
     if (senha) carregar(senha);
   }, []);
 
-  const resumo = useMemo(() => {
-    const sim = convidados.filter((c) => c.status === 'sim');
-    return {
-      total: convidados.length,
-      sim: sim.length,
-      nao: convidados.filter((c) => c.status === 'nao').length,
-      pendente: convidados.filter((c) => c.status === 'pendente').length,
-      pessoas: convidados.reduce((acc, c) => acc + pessoasConfirmadas(c), 0),
-    };
-  }, [convidados]);
+  const resumo = useMemo(() => ({
+  total: convidados.length,
+  sim: convidados.filter((c) => c.status === 'sim').length,
+  nao: convidados.filter((c) => c.status === 'nao').length,
+  pendente: convidados.filter((c) => c.status === 'pendente').length,
+  pessoas: convidados.reduce((acc, c) => acc + pessoasConfirmadas(c), 0),
+  possiveis: convidados.reduce((acc, c) => acc + c.pessoas.length, 0),
+}), [convidados]);
 
-  const lista = useMemo(
-    () =>
-      convidados.filter(
-        (c) =>
-          (filtro === 'todos' || c.status === filtro) &&
-          (!busca || norm(`${c.nome} ${c.acompanhante || ''}`).includes(norm(busca)))
-      ),
-    [convidados, filtro, busca]
-  );
+const lista = useMemo(
+  () =>
+    convidados.filter(
+      (c) =>
+        (filtro === 'todos' || c.status === filtro) &&
+        (!busca || norm(c.pessoas.map((p) => p.nome).join(' ')).includes(norm(busca)))
+    ),
+  [convidados, filtro, busca]
+);
 
   const exportarCsv = () => {
-    const linhas = [['Convidado', 'Acompanhante', 'Status', 'Convidado vai', 'Acompanhante vai', 'Restrição', 'Respondido em']];
-    lista.forEach((c) =>
-      linhas.push([
-        c.nome, c.acompanhante || '', c.status,
-        c.vai_convidado ? 'sim' : 'não', c.acompanhante ? (c.vai_acompanhante ? 'sim' : 'não') : '',
-        c.restricao || '', c.respondido_em ? new Date(c.respondido_em).toLocaleString('pt-BR') : '',
-      ])
+  const linhas = [['Pessoa', 'Convite', 'Status do convite', 'Vai', 'Restrição']];
+  lista.forEach((c) => {
+    const grupo = ordenadas(c).map((p) => p.nome).join(' / ');
+    ordenadas(c).forEach((p) =>
+      linhas.push([p.nome, grupo, c.status, c.status === 'sim' ? (p.vai ? 'sim' : 'não') : '', c.restricao || ''])
     );
-    const csv = linhas.map((l) => l.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
-    const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'confirmacoes.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  });
+  const csv = linhas.map((l) => l.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'confirmacoes.csv'; a.click();
+  URL.revokeObjectURL(url);
+};
 
   if (!logado) {
     return (
@@ -152,29 +147,27 @@ export default function Admin() {
           <table className="w-full text-left text-xs md:text-sm">
             <thead className="border-b border-dourado/30 font-apoio text-[9px] tracking-[0.15em] text-vinho/70">
               <tr>
-                <th className="p-3">CONVIDADO</th>
-                <th className="p-3">ACOMPANHANTE</th>
+                <th className="p-3">CONVITE</th>
                 <th className="p-3">STATUS</th>
+                <th className="p-3">VÃO</th>
                 <th className="p-3">RESTRIÇÃO</th>
               </tr>
             </thead>
             <tbody>
               {lista.map((c) => (
-                <tr key={c.id} className="border-b border-dourado/10 last:border-0">
-                  <td className="p-3">
-                    {c.nome}
-                    {c.status === 'sim' && !c.vai_convidado && <span className="ml-1 text-vinho/50">(não vai)</span>}
-                  </td>
-                  <td className="p-3">
-                    {c.acompanhante || '—'}
-                    {c.acompanhante && c.status === 'sim' && !c.vai_acompanhante && (
-                      <span className="ml-1 text-vinho/50">(não vai)</span>
-                    )}
-                  </td>
-                  <td className="p-3">{rotulo[c.status] || c.status}</td>
-                  <td className="p-3">{c.restricao || '—'}</td>
-                </tr>
-              ))}
+  <tr key={c.id} className="border-b border-dourado/10 last:border-0">
+    <td className="p-3">
+      {ordenadas(c).map((p) => (
+        <div key={p.id} className={c.status === 'sim' && !p.vai ? 'text-vinho/40 line-through' : ''}>
+          {p.nome}
+        </div>
+      ))}
+    </td>
+    <td className="p-3">{rotulo[c.status] || c.status}</td>
+    <td className="p-3">{c.status === 'sim' ? `${pessoasConfirmadas(c)}/${c.pessoas.length}` : '—'}</td>
+    <td className="p-3">{c.restricao || '—'}</td>
+  </tr>
+))}
               {lista.length === 0 && (
                 <tr><td colSpan={4} className="p-6 text-center text-vinho/60">Nenhum resultado.</td></tr>
               )}

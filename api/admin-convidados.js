@@ -14,9 +14,9 @@ export default async function handler(req, res) {
   if (!senhaOk(req.headers['x-admin-senha'])) return res.status(401).json({ erro: 'senha' });
 
   const { data, error } = await sb
-    .from('convidados')
-    .select('id,nome,acompanhante,status,vai_convidado,vai_acompanhante,restricao,respondido_em,token')
-    .order('nome');
+  .from('convites')
+  .select('id,token,status,restricao,respondido_em,pessoas(id,nome,ordem,vai)')
+  .order('respondido_em', { ascending: false, nullsFirst: false });
 
   if (error) return res.status(500).json({ erro: 'banco' });
   res.json({ convidados: data });

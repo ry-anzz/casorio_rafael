@@ -666,24 +666,35 @@ function App() {
                     </p>
                     <div className="flex w-full flex-wrap gap-2.5 md:flex-nowrap">
                       {pessoas.map((p) => {
-                        const ativo = !!rsvp.marcados[p.chave];
-                        return (
-                          <button
-                            type="button"
-                            key={p.chave}
-                            onClick={() => setRsvp({ ...rsvp, marcados: { ...rsvp.marcados, [p.chave]: !rsvp.marcados[p.chave] } })}
-                          >
-                            <div className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
-                              ativo ? 'border-dourado bg-[#A48255] text-white' : 'border-dourado/40 bg-transparent text-transparent'
-                            }`}>
-                              <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                            {p.nome}
-                          </button>
-                        );
-                      })}
+  const ativo = !!rsvp.marcados[p.chave];
+  return (
+    <button
+      type="button"
+      key={p.chave}
+      onClick={() =>
+        setRsvp({ ...rsvp, marcados: { ...rsvp.marcados, [p.chave]: !rsvp.marcados[p.chave] } })
+      }
+      className={`flex min-w-[40%] flex-1 items-center gap-2 rounded-md border px-3 py-2.5 text-[11px] transition md:min-w-0 md:flex-none md:px-6 md:text-xs ${
+        ativo
+          ? 'border-dourado/50 bg-[#E8DCC8] text-vinho shadow-sm'
+          : 'border-dourado/30 bg-transparent text-vinho/60 hover:border-dourado/50'
+      }`}
+    >
+      <div
+        className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
+          ativo
+            ? 'border-dourado bg-[#A48255] text-white'
+            : 'border-dourado/40 bg-transparent text-transparent'
+        }`}
+      >
+        <svg className="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      {p.nome}
+    </button>
+  );
+})}
                     </div>
                   </div>
                 )}

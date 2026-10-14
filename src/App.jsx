@@ -131,16 +131,19 @@ function App() {
 
     const [rsvp, setRsvp] = useState({ presenca: 'sim', marcados: {}, restricao: '' });
 
-  const selecionarConvidado = (c) => {
-    setConvidado(c);
-    setEnviado(false);
-    setErroRsvp('');
-    setRsvp({
-      presenca: c.status === 'nao' ? 'nao' : 'sim',
-      marcados: Object.fromEntries(c.pessoas.map((p) => [p.id, p.vai ?? true])),
-      restricao: c.restricao || '',
-    });
-  };
+const selecionarConvidado = (c) => {
+  const jaRespondeu = c.status !== 'pendente';
+  setConvidado(c);
+  setEnviado(jaRespondeu);
+  setErroRsvp('');
+  setRsvp({
+    presenca: c.status === 'nao' ? 'nao' : 'sim',
+    marcados: Object.fromEntries(
+      c.pessoas.map((p) => [p.id, c.status === 'sim' ? !!p.vai : true])
+    ),
+    restricao: c.restricao || '',
+  });
+};
 
     // link personalizado ?c=TOKEN
   useEffect(() => {
@@ -754,6 +757,14 @@ function App() {
                     ? 'Estamos muito felizes em compartilhar esse momento com você.'
                     : 'Sentiremos a sua falta, obrigado por avisar.'}
                 </p>
+                {rsvp.presenca === 'sim' && (
+  <p className="mb-1.5 text-[10px] text-vinho/80 md:text-xs">
+    Confirmados:{' '}
+    {listaNomes(
+      convidado.pessoas.filter((p) => rsvp.marcados[p.id]).map((p) => p.nome.split(' ')[0])
+    )}
+  </p>
+)}
                 {rsvp.presenca === 'sim' && (
                   <p className="text-[10px] italic text-vinho/80 md:text-xs">Nos vemos em 17 de janeiro. ♥</p>
                 )}

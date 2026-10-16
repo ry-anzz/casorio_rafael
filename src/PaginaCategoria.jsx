@@ -225,7 +225,7 @@ const jaPresenteado = (item) => pagos.includes(`${slug}|${item.nome}`);
       disabled={carregando}
       className="w-full bg-[#A48255] px-4 py-3 font-apoio text-[9px] tracking-[0.2em] text-[#F5EEE4] transition hover:bg-[#8c6b41] disabled:opacity-60"
     >
-      {carregando ? 'ABRINDO PAGAMENTO...' : 'PRESENTEAR COM MERCADO PAGO'}
+      {carregando ? 'ABRINDO PAGAMENTO...' : 'PRESENTEAR COM InfinityPay'}
     </button>
     <p className="mt-2 text-[10px] text-vinho/60">
       Pagamento seguro por Pix ou cartão.

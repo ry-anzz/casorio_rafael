@@ -1,6 +1,8 @@
 import catalogo from './_catalogo.js';
 import { itemJaPago, CATEGORIAS_MULTIPLAS } from './_supabase.js';
 
+const INFINITEPAY_LINKS = 'https://api.checkout.infinitepay.io/links';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ erro: 'Método não permitido' });
@@ -9,7 +11,7 @@ export default async function handler(req, res) {
   const { slug, nome, convidado, mensagem } = req.body || {};
   const nomeNormalizado = String(nome || '').normalize('NFC');
   const chave = `${slug}|${nomeNormalizado}`;
-  const preco = catalogo[chave];
+  const preco = catalogo[chave]; // em reais
 
   if (!preco || !convidado?.trim()) {
     return res.status(400).json({ erro: 'Dados inválidos' });
@@ -29,67 +31,53 @@ export default async function handler(req, res) {
 
   const site = (process.env.SITE_URL || `https://${req.headers.host}`).replace(/\/$/, '');
 
-  // Dados do presente dentro do external_reference (limite de 256 caracteres)
+  // A InfinitePay não tem metadata: os dados do presente viajam dentro do order_nsu
+  // (volta no webhook). "t" garante que o order_nsu seja único a cada tentativa.
   const ref = {
     c: slug,
     i: nomeNormalizado,
     v: convidado.trim().slice(0, 40),
     m: (mensagem || '').slice(0, 50),
+    t: Date.now().toString(36),
   };
-  let externalRef = Buffer.from(JSON.stringify(ref)).toString('base64url');
-  if (externalRef.length > 256) {
+  let orderNsu = Buffer.from(JSON.stringify(ref)).toString('base64url');
+  if (orderNsu.length > 200) {
     ref.m = '';
-    externalRef = Buffer.from(JSON.stringify(ref)).toString('base64url');
+    orderNsu = Buffer.from(JSON.stringify(ref)).toString('base64url');
   }
 
-  const preferencia = {
+  const corpo = {
+    handle: process.env.INFINITEPAY_HANDLE, // sua InfiniteTag, sem o "$"
+    order_nsu: orderNsu,
     items: [
       {
-        id: chave,
-        title: `Presente: ${nome}`,
         quantity: 1,
-        unit_price: preco,
-        currency_id: 'BRL',
+        price: Math.round(preco * 100), // a InfinitePay usa centavos
+        description: `Presente: ${nomeNormalizado}`,
       },
     ],
-    back_urls: {
-      success: `${site}/presentes/obrigado`,
-      pending: `${site}/presentes/obrigado`,
-      failure: `${site}/presentes/${slug}`,
-    },
-    external_reference: externalRef,
-    statement_descriptor: 'ISABELLA RAFAEL',
-    metadata: {
-      convidado: convidado.trim().slice(0, 80),
-      mensagem: (mensagem || '').slice(0, 300),
-      item: nomeNormalizado,
-      categoria: slug,
-    },
+    redirect_url: `${site}/presentes/obrigado`,
   };
 
-  // auto_return e notification_url só funcionam com https (em localhost não)
+  // webhook só funciona com https (em localhost não)
   if (site.startsWith('https://')) {
-    preferencia.auto_return = 'approved';
-    preferencia.notification_url = `${site}/api/webhook-mp`;
+    corpo.webhook_url = `${site}/api/webhook-mp`;
   }
 
   try {
-    const resposta = await fetch('https://api.mercadopago.com/checkout/preferences', {
+    const resposta = await fetch(INFINITEPAY_LINKS, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(preferencia),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo),
     });
 
-    const dados = await resposta.json();
-    if (!resposta.ok) {
-      console.error('Erro Mercado Pago:', dados);
+    const dados = await resposta.json().catch(() => ({}));
+    if (!resposta.ok || !dados.url) {
+      console.error('Erro InfinitePay:', resposta.status, dados);
       return res.status(502).json({ erro: 'Falha ao criar o pagamento' });
     }
 
-    return res.status(200).json({ url: dados.init_point });
+    return res.status(200).json({ url: dados.url });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ erro: 'Erro interno' });

@@ -40,7 +40,7 @@ export default {
   "lavanderia|Lava e seca": 3000,
   "lavanderia|Varal ou organizador": 200,
   "quarto|Ar-condicionado": 2500,
-  "quarto|Cama": 300,
+  "quarto|Cama": 3000,
   "quarto|Colchas": 500,
   "quarto|Edredom": 450,
   "quarto|Jogo de lençol": 350,
